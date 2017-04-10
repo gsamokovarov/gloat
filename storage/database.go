@@ -56,29 +56,47 @@ func (s *DatabaseStorage) ensureSchemaTableExists() error {
 func NewPostgresStorage(db *sql.DB) Storage {
 	return &DatabaseStorage{
 		db: db,
-		createTableStatement: `CREATE TABLE IF NOT EXISTS schema_migrations (
-			version SERIAL PRIMARY KEY)`,
-		insertMigrationStatement:     `INSERT INTO schema_migrations (version) VALUES ($1)`,
-		selectAllMigrationsStatement: `SELECT version FROM schema_migrations`,
+		createTableStatement: `
+			CREATE TABLE IF NOT EXISTS schema_migrations (
+				version SERIAL PRIMARY KEY
+			)`,
+		insertMigrationStatement: `
+			INSERT INTO schema_migrations (version)
+			VALUES ($1)`,
+		selectAllMigrationsStatement: `
+			SELECT version
+			FROM schema_migrations`,
 	}
 }
 
 func NewMySQLStorage(db *sql.DB) Storage {
 	return &DatabaseStorage{
 		db: db,
-		createTableStatement: `CREATE TABLE IF NOT EXISTS schema_migrations (
-			version SERIAL PRIMARY KEY NOT NULL)`,
-		insertMigrationStatement:     `INSERT INTO schema_migrations (version) VALUES ($1)`,
-		selectAllMigrationsStatement: `SELECT version FROM schema_migrations`,
+		createTableStatement: `
+			CREATE TABLE IF NOT EXISTS schema_migrations (
+				version SERIAL PRIMARY KEY NOT NULL
+			)`,
+		insertMigrationStatement: `
+			INSERT INTO schema_migrations (version)
+			VALUES ($1)`,
+		selectAllMigrationsStatement: `
+			SELECT version
+			FROM schema_migrations`,
 	}
 }
 
 func NewSQLite3Storage(db *sql.DB) Storage {
 	return &DatabaseStorage{
 		db: db,
-		createTableStatement: `CREATE TABLE IF NOT EXISTS schema_migrations (
-			version INTEGER PRIMARY KEY AUTOINCREMENT)`,
-		insertMigrationStatement:     `INSERT INTO schema_migrations (version) VALUES ($1)`,
-		selectAllMigrationsStatement: `SELECT version FROM schema_migrations`,
+		createTableStatement: `
+			CREATE TABLE IF NOT EXISTS schema_migrations (
+				version INTEGER PRIMARY KEY AUTOINCREMENT
+			)`,
+		insertMigrationStatement: `
+			INSERT INTO schema_migrations (version)
+			VALUES ($1)`,
+		selectAllMigrationsStatement: `
+			SELECT version
+			FROM schema_migrations`,
 	}
 }
