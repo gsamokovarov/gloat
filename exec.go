@@ -1,18 +1,14 @@
-package exec
+package gloat
 
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/gsamokovarov/gloat/migration"
-	"github.com/gsamokovarov/gloat/source"
-	"github.com/gsamokovarov/gloat/storage"
 )
 
 // UnappliedMigrations selects the unapplied migrations from a Source. For a
 // migration to be unapplied it should not be present in the Storage.
-func UnappliedMigrations(source source.Source, storage source.Storage) (migration.Migrations, error) {
-	allMigrations, err := source.Collect()
+func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
+	allMigrations, err := Collect()
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +38,7 @@ type Executor struct {
 }
 
 // Up executes a migrations forward.
-func (e *Executor) Up(migration migration.Migration, storage storage.Storage) error {
+func (e *Executor) Up(migration Migration, storage Storage) error {
 	if _, err := db.Exec(migration.upSQL); err != nil {
 		return err
 	}
@@ -55,7 +51,7 @@ func (e *Executor) Up(migration migration.Migration, storage storage.Storage) er
 }
 
 // Down reverses a migrations.
-func (e *Executor) Down(migration migration.Migration, storage storage.Storage) error {
+func (e *Executor) Down(migration Migration, storage Storage) error {
 	if !migation.Reversible() {
 		return IrreversibleError{migration.Version}
 	}

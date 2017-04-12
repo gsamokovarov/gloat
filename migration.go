@@ -1,4 +1,4 @@
-package migration
+package gloat
 
 import (
 	"fmt"
@@ -6,9 +6,17 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
+	"strings"
+	"time"
 )
 
-var nameNormalizerRe = regexp.MustCompile(`([a-z])([A-Z])`)
+var (
+	Now = time.Now()
+
+	nameNormalizerRe = regexp.MustCompile(`([a-z])([A-Z])`)
+	versionFormat    = "20060319150405"
+)
 
 // Migration holds all the relevant information for a migration. The content of
 // the UP side, the DOWN side, a path and version. The version is used to
@@ -85,6 +93,20 @@ func FromPath(path string) (*Migration, error) {
 
 func generateMigrationPath(version int64, str string) (string, error) {
 	return fmt.Sprintf("%s_%s", version, nameNormalizerRe.ReplaceAllString(str, "$1_$2"))
+}
+
+func generateVersion() int64 {
+	version, _ := strconv.ParseInt(Now.Format(versionFormat), 10, 64)
+	return version
+}
+
+func versionFromPath(path string) (string, error) {
+	parts := strings.SplitN(filepath.Base(path), "_", 2)
+	if len(parts) == 0 {
+		return "", fmt.Errorf("cannot extract version from %s", path)
+	}
+
+	return parts[0], nil
 }
 
 // Migrations is a slice of Migration pointers.

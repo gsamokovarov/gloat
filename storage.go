@@ -1,10 +1,12 @@
-package storage
+package gloat
 
-import (
-	"database/sql"
+import "database/sql"
 
-	"github.com/gsamokovarov/gloat/migration"
-)
+type Storage interface {
+	Insert(*Migration) error
+	Remove(*Migration) error
+	All() (Migrations, error)
+}
 
 type DatabaseStorage struct {
 	db *sql.DB
@@ -15,25 +17,25 @@ type DatabaseStorage struct {
 	selectAllMigrationsStatement string
 }
 
-func (s *DatabaseStorage) Insert(migration *migration.Migration) error {
+func (s *DatabaseStorage) Insert(migration *Migration) error {
 	if err := s.ensureSchemaTableExists(s.db); err != nil {
 		return err
 	}
 
-	_, err := s.db.Exec(s.insertMigrationStatement, migration.Version)
+	_, err := s.db.Exec(s.insertMigrationStatement, Version)
 	return err
 }
 
-func (s *DatabaseStorage) Remove(migration *migration.Migration) error {
+func (s *DatabaseStorage) Remove(migration *Migration) error {
 	if err := s.ensureSchemaTableExists(s.db); err != nil {
 		return err
 	}
 
-	_, err := s.db.Exec(s.removeMigrationStatement, migration.Version)
+	_, err := s.db.Exec(s.removeMigrationStatement, Version)
 	return err
 }
 
-func (s *DatabaseStorage) All() (migration.Migrations, error) {
+func (s *DatabaseStorage) All() (Migrations, error) {
 	if err := s.ensureSchemaTableExists(s.db); err != nil {
 		return nil, err
 	}
@@ -44,10 +46,10 @@ func (s *DatabaseStorage) All() (migration.Migrations, error) {
 	}
 	defer rows.Close()
 
-	var migrations migration.Migrations
+	var migrations Migrations
 
 	for rows.Next() {
-		var m migration.Migration
+		var m Migration
 		if err := rows.Scan(&m.Version); err != nil {
 			return nil, err
 		}
