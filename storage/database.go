@@ -11,6 +11,7 @@ type DatabaseStorage struct {
 
 	createTableStatement         string
 	insertMigrationStatement     string
+	removeMigrationStatement     string
 	selectAllMigrationsStatement string
 }
 
@@ -63,6 +64,9 @@ func NewPostgresStorage(db *sql.DB) Storage {
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
 			VALUES ($1)`,
+		removeMigrationStatement: `
+			REMOVE FROM schema_migrations
+			WHERE version=$1`,
 		selectAllMigrationsStatement: `
 			SELECT version
 			FROM schema_migrations`,
@@ -79,6 +83,9 @@ func NewMySQLStorage(db *sql.DB) Storage {
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
 			VALUES ($1)`,
+		removeMigrationStatement: `
+			REMOVE FROM schema_migrations
+			WHERE version=$1`,
 		selectAllMigrationsStatement: `
 			SELECT version
 			FROM schema_migrations`,
@@ -95,6 +102,9 @@ func NewSQLite3Storage(db *sql.DB) Storage {
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
 			VALUES ($1)`,
+		removeMigrationStatement: `
+			REMOVE FROM schema_migrations
+			WHERE version=$1`,
 		selectAllMigrationsStatement: `
 			SELECT version
 			FROM schema_migrations`,

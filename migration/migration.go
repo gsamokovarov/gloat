@@ -21,9 +21,6 @@ type Migration struct {
 	Version int64
 }
 
-// Migrations is a slice of Migration pointers.
-type Migrations []*Migration
-
 // Reversible returns true if the migration DownSQL content is present. E.g. if
 // both of the directions are present in the migration folder.
 func (m *Migration) Reversible() bool {
@@ -54,7 +51,7 @@ func GenerateMigration(str) (*Migration, error) {
 	}, nil
 }
 
-// FromDirectory builds a Migration struct from a path of a directory structure
+// FromPath builds a Migration struct from a path of a directory structure
 // like the one below:
 //
 // migrations/20170329154959_introduce_domain_model/up.sql
@@ -88,4 +85,23 @@ func FromPath(path string) (*Migration, error) {
 
 func generateMigrationPath(version int64, str string) (string, error) {
 	return fmt.Sprintf("%s_%s", version, nameNormalizerRe.ReplaceAllString(str, "$1_$2"))
+}
+
+// Migrations is a slice of Migration pointers.
+type Migrations []*Migration
+
+// Unapplied selects migrations that does not exist in the current ones.
+func (m Migrations) Unapplied(migrations Migrations) (filtered Migrations) {
+	var existing map[int64]bool
+	for _, migration := range m {
+		existing[m.Version] = true
+	}
+
+	for _, migration := range migrations {
+		if !existing[migration.Version] {
+			filtered = append(filtered, migration)
+		}
+	}
+
+	return
 }
