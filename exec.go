@@ -22,8 +22,8 @@ type Executor struct {
 }
 
 // Up executes a migrations forward.
-func (e *Executor) Up(migration Migration, storage Storage) error {
-	if _, err := db.Exec(migration.upSQL); err != nil {
+func (e *Executor) Up(migration *Migration, storage Storage) error {
+	if _, err := e.db.Exec(string(migration.UpSQL)); err != nil {
 		return err
 	}
 
@@ -35,12 +35,12 @@ func (e *Executor) Up(migration Migration, storage Storage) error {
 }
 
 // Down reverses a migrations.
-func (e *Executor) Down(migration Migration, storage Storage) error {
-	if !migation.Reversible() {
+func (e *Executor) Down(migration *Migration, storage Storage) error {
+	if !migration.Reversible() {
 		return IrreversibleError{migration.Version}
 	}
 
-	if _, err := db.Exec(migration.downSQL); err != nil {
+	if _, err := e.db.Exec(string(migration.DownSQL)); err != nil {
 		return err
 	}
 

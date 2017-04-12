@@ -42,21 +42,14 @@ func (m *Migration) Persistable() bool {
 
 // GenerateMigration generates a new blank migration with blank UP and DOWN
 // content defined from user entered content.
-func GenerateMigration(str) (*Migration, error) {
-	version, err := generateVersion()
-	if err != nil {
-		return nil, err
-	}
-
-	path, err := generateMigrationPath(version, str)
-	if err != nil {
-		return nil, err
-	}
+func GenerateMigration(str string) *Migration {
+	version := generateVersion()
+	path := generateMigrationPath(version, str)
 
 	return &Migration{
 		Path:    path,
 		Version: version,
-	}, nil
+	}
 }
 
 // FromPath builds a Migration struct from a path of a directory structure
@@ -91,7 +84,7 @@ func FromPath(path string) (*Migration, error) {
 	}, nil
 }
 
-func generateMigrationPath(version int64, str string) (string, error) {
+func generateMigrationPath(version int64, str string) string {
 	return fmt.Sprintf("%s_%s", version, nameNormalizerRe.ReplaceAllString(str, "$1_$2"))
 }
 
@@ -100,13 +93,13 @@ func generateVersion() int64 {
 	return version
 }
 
-func versionFromPath(path string) (string, error) {
+func versionFromPath(path string) (int64, error) {
 	parts := strings.SplitN(filepath.Base(path), "_", 2)
 	if len(parts) == 0 {
-		return "", fmt.Errorf("cannot extract version from %s", path)
+		return 0, fmt.Errorf("cannot extract version from %s", path)
 	}
 
-	return parts[0], nil
+	return strconv.ParseInt(parts[0], 10, 64)
 }
 
 // Migrations is a slice of Migration pointers.
@@ -116,7 +109,7 @@ type Migrations []*Migration
 func (m Migrations) Except(migrations Migrations) (excepted Migrations) {
 	var existing map[int64]bool
 	for _, migration := range m {
-		existing[m.Version] = true
+		existing[migration.Version] = true
 	}
 
 	for _, migration := range migrations {

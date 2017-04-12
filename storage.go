@@ -18,25 +18,25 @@ type DatabaseStorage struct {
 }
 
 func (s *DatabaseStorage) Insert(migration *Migration) error {
-	if err := s.ensureSchemaTableExists(s.db); err != nil {
+	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
 	}
 
-	_, err := s.db.Exec(s.insertMigrationStatement, Version)
+	_, err := s.db.Exec(s.insertMigrationStatement, migration.Version)
 	return err
 }
 
 func (s *DatabaseStorage) Remove(migration *Migration) error {
-	if err := s.ensureSchemaTableExists(s.db); err != nil {
+	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
 	}
 
-	_, err := s.db.Exec(s.removeMigrationStatement, Version)
+	_, err := s.db.Exec(s.removeMigrationStatement, migration.Version)
 	return err
 }
 
 func (s *DatabaseStorage) All() (Migrations, error) {
-	if err := s.ensureSchemaTableExists(s.db); err != nil {
+	if err := s.ensureSchemaTableExists(); err != nil {
 		return nil, err
 	}
 
@@ -49,7 +49,7 @@ func (s *DatabaseStorage) All() (Migrations, error) {
 	var migrations Migrations
 
 	for rows.Next() {
-		var m Migration
+		m := &Migration{}
 		if err := rows.Scan(&m.Version); err != nil {
 			return nil, err
 		}
@@ -61,11 +61,11 @@ func (s *DatabaseStorage) All() (Migrations, error) {
 }
 
 func (s *DatabaseStorage) ensureSchemaTableExists() error {
-	_, err := db.Exec(s.createTableStatement)
+	_, err := s.db.Exec(s.createTableStatement)
 	return err
 }
 
-func NewPostgresStorage(db *sql.DB) Storage {
+func NewPostgresSQLStorage(db *sql.DB) Storage {
 	return &DatabaseStorage{
 		db: db,
 		createTableStatement: `
