@@ -112,8 +112,8 @@ func versionFromPath(path string) (string, error) {
 // Migrations is a slice of Migration pointers.
 type Migrations []*Migration
 
-// Unapplied selects migrations that does not exist in the current ones.
-func (m Migrations) Unapplied(migrations Migrations) (filtered Migrations) {
+// Except selects migrations that does not exist in the current ones.
+func (m Migrations) Except(migrations Migrations) (excepted Migrations) {
 	var existing map[int64]bool
 	for _, migration := range m {
 		existing[m.Version] = true
@@ -121,9 +121,25 @@ func (m Migrations) Unapplied(migrations Migrations) (filtered Migrations) {
 
 	for _, migration := range migrations {
 		if !existing[migration.Version] {
-			filtered = append(filtered, migration)
+			excepted = append(excepted, migration)
 		}
 	}
 
 	return
+}
+
+// UnappliedMigrations selects the unapplied migrations from a Source. For a
+// migration to be unapplied it should not be present in the Storage.
+func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
+	allMigrations, err := source.Collect()
+	if err != nil {
+		return nil, err
+	}
+
+	appliedMigrations, err := storage.All()
+	if err != nil {
+		return nil, err
+	}
+
+	return allMigrations.Except(appliedMigrations), nil
 }

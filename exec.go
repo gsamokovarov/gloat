@@ -5,22 +5,6 @@ import (
 	"fmt"
 )
 
-// UnappliedMigrations selects the unapplied migrations from a Source. For a
-// migration to be unapplied it should not be present in the Storage.
-func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
-	allMigrations, err := Collect()
-	if err != nil {
-		return nil, err
-	}
-
-	appliedMigrations, err := storage.All()
-	if err != nil {
-		return nil, err
-	}
-
-	return allMigrations.Filter(appliedMigrations), nil
-}
-
 // IrreversibleError is the error return when we're trying to reverse a
 // migration that has a blank down SQL content.
 type IrreversibleError struct {
