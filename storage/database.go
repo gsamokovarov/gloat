@@ -24,6 +24,15 @@ func (s *DatabaseStorage) Insert(migration *migration.Migration) error {
 	return err
 }
 
+func (s *DatabaseStorage) Remove(migration *migration.Migration) error {
+	if err := s.ensureSchemaTableExists(s.db); err != nil {
+		return err
+	}
+
+	_, err := s.db.Exec(s.removeMigrationStatement, migration.Version)
+	return err
+}
+
 func (s *DatabaseStorage) All() (migration.Migrations, error) {
 	if err := s.ensureSchemaTableExists(s.db); err != nil {
 		return nil, err
