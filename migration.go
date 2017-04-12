@@ -129,7 +129,7 @@ func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
 		return nil, err
 	}
 
-	appliedMigrations, err := storage.All()
+	appliedMigrations, err := storage.Collect()
 	if err != nil {
 		return nil, err
 	}

@@ -3,9 +3,10 @@ package gloat
 import "database/sql"
 
 type Storage interface {
+	Source
+
 	Insert(*Migration) error
 	Remove(*Migration) error
-	All() (Migrations, error)
 }
 
 type DatabaseStorage struct {
@@ -35,7 +36,7 @@ func (s *DatabaseStorage) Remove(migration *Migration) error {
 	return err
 }
 
-func (s *DatabaseStorage) All() (Migrations, error) {
+func (s *DatabaseStorage) Collect() (Migrations, error) {
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return nil, err
 	}
