@@ -56,6 +56,10 @@ func (e *Executor) Up(migration migration.Migration, storage storage.Storage) er
 
 // Down reverses a migrations.
 func (e *Executor) Down(migration migration.Migration, storage storage.Storage) error {
+	if !migation.Reversible() {
+		return IrreversibleError{migration.Version}
+	}
+
 	if _, err := db.Exec(migration.downSQL); err != nil {
 		return err
 	}
