@@ -13,10 +13,8 @@ type FileSystemSource struct {
 	MigrationsFolder string
 }
 
-func (s *FileSystemSource) Collect() (Migrations, error) {
-	var migrations Migrations
-
-	err := filepath.Walk(s.MigrationsFolder, func(path string, info os.FileInfo, err error) error {
+func (s *FileSystemSource) Collect() (migrations Migrations, err error) {
+	err = filepath.Walk(s.MigrationsFolder, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			migration, err := FromPath(path)
 			if err != nil {
@@ -29,5 +27,9 @@ func (s *FileSystemSource) Collect() (Migrations, error) {
 		return nil
 	})
 
-	return migrations, err
+	return
+}
+
+func NewFileSystemSource(migrationsFolder string) Source {
+	return &FileSystemSource{MigrationsFolder: migrationsFolder}
 }
