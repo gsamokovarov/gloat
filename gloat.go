@@ -2,7 +2,7 @@ package gloat
 
 type Config struct {
 	ConnectionString   string
-	MigrationsFilder   string
+	MigrationsFolder   string
 	MigrationsEmbedded bool
 	Release            bool
 }
