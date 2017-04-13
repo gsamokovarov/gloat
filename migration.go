@@ -33,7 +33,7 @@ type Migration struct {
 // Reversible returns true if the migration DownSQL content is present. E.g. if
 // both of the directions are present in the migration folder.
 func (m *Migration) Reversible() bool {
-	return len(m.DownSQL) == 0
+	return len(m.DownSQL) != 0
 }
 
 // Persistable is any migration with non blank Path.
@@ -53,7 +53,7 @@ func GenerateMigration(str string) *Migration {
 	}
 }
 
-// FromPath builds a Migration struct from a path of a directory structure
+// MigrationFromPath builds a Migration struct from a path of a directory structure
 // like the one below:
 //
 // migrations/20170329154959_introduce_domain_model/up.sql
@@ -61,7 +61,7 @@ func GenerateMigration(str string) *Migration {
 //
 // If the path does not exist or does not follow the name conventions, an error
 // could be returned.
-func FromPath(path string) (*Migration, error) {
+func MigrationFromPath(path string) (*Migration, error) {
 	version, err := versionFromPath(path)
 	if err != nil {
 		return nil, err

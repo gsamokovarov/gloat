@@ -16,7 +16,7 @@ type FileSystemSource struct {
 func (s *FileSystemSource) Collect() (migrations Migrations, err error) {
 	err = filepath.Walk(s.MigrationsFolder, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() && path != s.MigrationsFolder {
-			migration, err := FromPath(path)
+			migration, err := MigrationFromPath(path)
 			if err != nil {
 				return err
 			}
