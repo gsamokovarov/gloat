@@ -142,6 +142,18 @@ func (m Migrations) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }
 // Sort is a convenience sorting method.
 func (m Migrations) Sort() { sort.Sort(m) }
 
+// Current returns the latest applied migration. Can be nil, if the migrations
+// are empty.
+func (m Migrations) Current() *Migration {
+	m.Sort()
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return m[len(m)-1]
+}
+
 // UnappliedMigrations selects the unapplied migrations from a Source. For a
 // migration to be unapplied it should not be present in the Storage.
 func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
