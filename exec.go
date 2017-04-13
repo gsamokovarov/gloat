@@ -50,3 +50,7 @@ func (e *Executor) Down(migration *Migration, storage Storage) error {
 
 	return nil
 }
+
+func NewExecutor(db *sql.DB) *Executor {
+	return &Executor{db: db}
+}

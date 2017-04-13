@@ -106,8 +106,11 @@ func versionFromPath(path string) (int64, error) {
 type Migrations []*Migration
 
 // Except selects migrations that does not exist in the current ones.
-func (m Migrations) Except(migrations Migrations) (excepted Migrations) {
-	var existing map[int64]bool
+func (m Migrations) Except(migrations Migrations) Migrations {
+	excepted := make(Migrations, len(m))
+	copy(excepted, m)
+
+	existing := map[int64]bool{}
 	for _, migration := range m {
 		existing[migration.Version] = true
 	}
@@ -118,7 +121,7 @@ func (m Migrations) Except(migrations Migrations) (excepted Migrations) {
 		}
 	}
 
-	return
+	return excepted
 }
 
 // UnappliedMigrations selects the unapplied migrations from a Source. For a

@@ -71,13 +71,13 @@ func NewPostgresSQLStorage(db *sql.DB) Storage {
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version SERIAL PRIMARY KEY
+				version BIGSERIAL PRIMARY KEY
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
 			VALUES ($1)`,
 		removeMigrationStatement: `
-			REMOVE FROM schema_migrations
+			DELETE FROM schema_migrations
 			WHERE version=$1`,
 		selectAllMigrationsStatement: `
 			SELECT version
@@ -90,13 +90,13 @@ func NewMySQLStorage(db *sql.DB) Storage {
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version SERIAL PRIMARY KEY NOT NULL
+				version BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
 			VALUES ($1)`,
 		removeMigrationStatement: `
-			REMOVE FROM schema_migrations
+			DELETE FROM schema_migrations
 			WHERE version=$1`,
 		selectAllMigrationsStatement: `
 			SELECT version
@@ -109,13 +109,13 @@ func NewSQLite3Storage(db *sql.DB) Storage {
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version INTEGER PRIMARY KEY AUTOINCREMENT
+				version BIGINT PRIMARY KEY AUTOINCREMENT NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
 			VALUES ($1)`,
 		removeMigrationStatement: `
-			REMOVE FROM schema_migrations
+			DELETE FROM schema_migrations
 			WHERE version=$1`,
 		selectAllMigrationsStatement: `
 			SELECT version
