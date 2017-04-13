@@ -167,5 +167,8 @@ func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
 		return nil, err
 	}
 
-	return allMigrations.Except(appliedMigrations), nil
+	unappliedMigrations := allMigrations.Except(appliedMigrations)
+	unappliedMigrations.Sort()
+
+	return unappliedMigrations, nil
 }
