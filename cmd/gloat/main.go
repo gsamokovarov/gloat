@@ -30,12 +30,20 @@ func main() {
 		Exitf(1, "Error: %v\n", err)
 	}
 
+	appliedMigrations := map[int64]bool{}
+
 	for _, migration := range migrations {
-		Outf("Applying migration: %d\n", migration.Version)
+		Outf("Applying migration: %d...\n", migration.Version)
 
 		if err := executor.Up(migration, storage); err != nil {
 			Exitf(1, "Error: %v\n", err)
 		}
+
+		appliedMigrations[migration.Version] = true
+	}
+
+	if len(appliedMigrations) == 0 {
+		Outf("No migrations to apply\n")
 	}
 }
 
