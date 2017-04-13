@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -131,6 +132,15 @@ func (m Migrations) Except(migrations Migrations) (excepted Migrations) {
 
 	return
 }
+
+// Implementation for the sort.Sort interface.
+
+func (m Migrations) Len() int           { return len(m) }
+func (m Migrations) Less(i, j int) bool { return m[i].Version < m[j].Version }
+func (m Migrations) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }
+
+// Sort is a convenience sorting method.
+func (m Migrations) Sort() { sort.Sort(m) }
 
 // UnappliedMigrations selects the unapplied migrations from a Source. For a
 // migration to be unapplied it should not be present in the Storage.
