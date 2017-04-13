@@ -86,7 +86,7 @@ func MigrationFromPath(path string) (*Migration, error) {
 }
 
 func generateMigrationPath(version int64, str string) string {
-	return fmt.Sprintf("%s_%s", version, nameNormalizerRe.ReplaceAllString(str, "$1_$2"))
+	return fmt.Sprintf("%d_%s", version, nameNormalizerRe.ReplaceAllString(str, "$1_$2"))
 }
 
 func generateVersion() int64 {

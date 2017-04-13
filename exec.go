@@ -13,7 +13,7 @@ type IrreversibleError struct {
 
 // Error implements the error interface.
 func (err IrreversibleError) Error() string {
-	return fmt.Sprintf("cannot reverse migration %s", err.Version)
+	return fmt.Sprintf("cannot reverse migration %d", err.Version)
 }
 
 // Executor is a type that executes migrations up and down.
