@@ -17,7 +17,7 @@ func main() {
 
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
-		Exitf(1, "Error: %v", err)
+		Exitf(1, "Error: %v\n", err)
 	}
 
 	executor := gloat.NewExecutor(db)
@@ -27,12 +27,14 @@ func main() {
 
 	migrations, err := gloat.UnappliedMigrations(source, storage)
 	if err != nil {
-		Exitf(1, "Error: %v", err)
+		Exitf(1, "Error: %v\n", err)
 	}
 
 	for _, migration := range migrations {
+		Outf("Applying migration: %d\n", migration.Version)
+
 		if err := executor.Up(migration, storage); err != nil {
-			Exitf(1, "Error: %v", err)
+			Exitf(1, "Error: %v\n", err)
 		}
 	}
 }
@@ -40,4 +42,8 @@ func main() {
 func Exitf(code int, format string, a ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, a...)
 	os.Exit(code)
+}
+
+func Outf(format string, a ...interface{}) {
+	fmt.Fprintf(os.Stdout, format, a...)
 }
