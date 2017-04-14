@@ -1,33 +1,35 @@
 package main
 
-import (
-	"database/sql"
-	"fmt"
-	"os"
+import "os"
 
-	"github.com/gsamokovarov/gloat"
-	_ "github.com/lib/pq"
-)
+const helpMsg = `Usage gloat: [COMMAND ...]
+
+Gloat is a Go SQL migration utility.
+
+Commands:
+  up            Apply new migrations
+  down          Revert the last applied migration
+
+Options:
+  --help        Show this message
+`
 
 func main() {
-	connectionString, found := os.LookupEnv("DATABASE_URL")
-	if !found {
-		Exitf(1, "No database config at DATABASE_URL")
+	args := os.Args
+
+	if len(args) < 2 {
+		Exitf(1, helpMsg)
 	}
 
-	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		Exitf(1, "Error: %v\n", err)
+	switch args[1] {
+	case "up":
+		upCmd()
+	case "down":
+		downCmd()
 	}
+}
 
-	gl := gloat.Gloat{
-		InitialPath: "testdata/migrations",
-
-		Source:   gloat.NewFileSystemSource("testdata/migrations"),
-		Storage:  gloat.NewPostgresSQLStorage(db),
-		Executor: gloat.NewExecutor(db),
-	}
-
+func upCmd() {
 	migrations, err := gl.UnappliedMigrations()
 	if err != nil {
 		Exitf(1, "Error: %v\n", err)
@@ -50,11 +52,19 @@ func main() {
 	}
 }
 
-func Exitf(code int, format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, format, a...)
-	os.Exit(code)
-}
+func downCmd() {
+	migration, err := gl.CurrentMigration()
+	if err != nil {
+		Exitf(1, "Error: %v\n", err)
+	}
 
-func Outf(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stdout, format, a...)
+	if migration == nil {
+		Exitf(0, "No migrations to apply\n")
+	}
+
+	Outf("Reverting migration: %d...\n", migration.Version)
+
+	if err := gl.Revert(migration); err != nil {
+		Exitf(1, "Error: %v\n", err)
+	}
 }
