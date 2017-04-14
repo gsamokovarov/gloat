@@ -1,7 +1,8 @@
 package gloat
 
-// Configuration stores the configuration of all the Gloat building blocks.
-type Configuration struct {
+// Gloat glues all the components needed to apply and revert
+// migrations.
+type Gloat struct {
 	// InitialPath is the base path to the source of the migrations. If the
 	// source is a File System, this can be the folder storing all of the
 	// migrations.
@@ -20,18 +21,18 @@ type Configuration struct {
 	Executor *Executor
 }
 
-// UnappliedMigrations selects the unapplied migrations in the current
-// configuration.
-func (c *Configuration) UnappliedMigrations() (Migrations, error) {
+// UnappliedMigrations returns the unapplied migrations in the current
+// gloat.
+func (c *Gloat) UnappliedMigrations() (Migrations, error) {
 	return UnappliedMigrations(c.Source, c.Storage)
 }
 
-// ExecuteUp applies a migrations.
-func (c *Configuration) ExecuteUp(migration *Migration) error {
+// Apply applies a migrations.
+func (c *Gloat) Apply(migration *Migration) error {
 	return c.Executor.Up(migration, c.Storage)
 }
 
-// ExecuteDown reverses a migrations.
-func (c *Configuration) ExecuteDown(migration *Migration) error {
+// Reverse reverses a migrations.
+func (c *Gloat) Revert(migration *Migration) error {
 	return c.Executor.Down(migration, c.Storage)
 }
