@@ -20,12 +20,15 @@ func main() {
 		Exitf(1, "Error: %v\n", err)
 	}
 
-	executor := gloat.NewExecutor(db)
+	c := gloat.Configuration{
+		InitialPath: "testdata/migrations",
 
-	source := gloat.NewFileSystemSource("testdata/migrations")
-	storage := gloat.NewPostgresSQLStorage(db)
+		Source:   gloat.NewFileSystemSource("testdata/migrations"),
+		Storage:  gloat.NewPostgresSQLStorage(db),
+		Executor: gloat.NewExecutor(db),
+	}
 
-	migrations, err := gloat.UnappliedMigrations(source, storage)
+	migrations, err := c.UnappliedMigrations()
 	if err != nil {
 		Exitf(1, "Error: %v\n", err)
 	}
@@ -35,7 +38,7 @@ func main() {
 	for _, migration := range migrations {
 		Outf("Applying migration: %d...\n", migration.Version)
 
-		if err := executor.Up(migration, storage); err != nil {
+		if err := c.ExecuteUp(migration); err != nil {
 			Exitf(1, "Error: %v\n", err)
 		}
 

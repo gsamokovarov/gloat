@@ -21,7 +21,7 @@ type Executor struct {
 	db *sql.DB
 }
 
-// Up executes a migrations forward.
+// Up applies a migrations.
 func (e *Executor) Up(migration *Migration, storage Storage) error {
 	if _, err := e.db.Exec(string(migration.UpSQL)); err != nil {
 		return err
