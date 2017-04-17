@@ -30,7 +30,7 @@ func main() {
 }
 
 func upCmd() {
-	migrations, err := gl.UnappliedMigrations()
+	migrations, err := gl.Unapplied()
 	if err != nil {
 		Exitf(1, "Error: %v\n", err)
 	}
@@ -53,7 +53,7 @@ func upCmd() {
 }
 
 func downCmd() {
-	migration, err := gl.CurrentMigration()
+	migration, err := gl.Current()
 	if err != nil {
 		Exitf(1, "Error: %v\n", err)
 	}

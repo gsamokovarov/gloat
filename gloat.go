@@ -21,18 +21,17 @@ type Gloat struct {
 	Executor *Executor
 }
 
-// UnappliedMigrations returns the unapplied migrations in the current
-// gloat.
-func (c *Gloat) UnappliedMigrations() (Migrations, error) {
+// Unapplied returns the unapplied migrations in the current gloat.
+func (c *Gloat) Unapplied() (Migrations, error) {
 	return UnappliedMigrations(c.Source, c.Storage)
 }
 
-// CurrentMigration returns the latest applied migration. Even if no
-// error is returned, the current migration can be nil.
+// Current returns the latest applied migration. Even if no error is returned,
+// the current migration can be nil.
 //
-// This is the case when the last applied migration is no longer
-// available from the source or there are no migrations to begin with.
-func (c *Gloat) CurrentMigration() (*Migration, error) {
+// This is the case when the last applied migration is no longer available from
+// the source or there are no migrations to begin with.
+func (c *Gloat) Current() (*Migration, error) {
 	appliedMigrations, err := c.Storage.Collect()
 	if err != nil {
 		return nil, err
@@ -64,7 +63,7 @@ func (c *Gloat) Apply(migration *Migration) error {
 	return c.Executor.Up(migration, c.Storage)
 }
 
-// Reverse reverses a migrations.
+// Revert rollbacks a migration.
 func (c *Gloat) Revert(migration *Migration) error {
 	return c.Executor.Down(migration, c.Storage)
 }
