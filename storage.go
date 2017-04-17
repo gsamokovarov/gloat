@@ -71,7 +71,7 @@ func NewPostgresSQLStorage(db *sql.DB) Storage {
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version BIGSERIAL PRIMARY KEY
+				version BIGINT PRIMARY KEY NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
@@ -90,7 +90,7 @@ func NewMySQLStorage(db *sql.DB) Storage {
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL
+				version BIGINT PRIMARY KEY NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
@@ -109,7 +109,7 @@ func NewSQLite3Storage(db *sql.DB) Storage {
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version BIGINT PRIMARY KEY AUTOINCREMENT NOT NULL
+				version BIGINT PRIMARY KEY NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
