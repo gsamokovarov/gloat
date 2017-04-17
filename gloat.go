@@ -18,7 +18,7 @@ type Gloat struct {
 
 	// Executor applies migrations and marks the newly applied migration
 	// versions in the Store.
-	Executor *Executor
+	Executor Executor
 }
 
 // Unapplied returns the unapplied migrations in the current gloat.
@@ -58,7 +58,7 @@ func (c *Gloat) Current() (*Migration, error) {
 	return nil, nil
 }
 
-// Apply applies a migrations.
+// Apply applies a migration.
 func (c *Gloat) Apply(migration *Migration) error {
 	return c.Executor.Up(migration, c.Storage)
 }
