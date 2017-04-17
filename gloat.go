@@ -28,9 +28,10 @@ func (c *Gloat) UnappliedMigrations() (Migrations, error) {
 }
 
 // CurrentMigration returns the latest applied migration. Even if no
-// error is returned, the current migration can be nil. This is the
-// case when the last applied migration is no longer available from
-// the source or there are no migrations to begin with.
+// error is returned, the current migration can be nil.
+//
+// This is the case when the last applied migration is no longer
+// available from the source or there are no migrations to begin with.
 func (c *Gloat) CurrentMigration() (*Migration, error) {
 	appliedMigrations, err := c.Storage.Collect()
 	if err != nil {
