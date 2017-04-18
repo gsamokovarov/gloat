@@ -22,11 +22,16 @@ func init() {
 		Exitf(1, "Error: %v\n", err)
 	}
 
+	storage, err := gloat.NewDatabaseStorage("postgres", db)
+	if err != nil {
+		Exitf(1, "Error: %v\n", err)
+	}
+
 	gl = gloat.Gloat{
 		InitialPath: "testdata/migrations",
 
+		Storage:  storage,
 		Source:   gloat.NewFileSystemSource("testdata/migrations"),
-		Storage:  gloat.NewGenericDatabaseStorage(db),
 		Executor: gloat.NewExecutor(db),
 	}
 }

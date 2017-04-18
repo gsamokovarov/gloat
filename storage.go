@@ -1,6 +1,9 @@
 package gloat
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
 
 type Storage interface {
 	Source
@@ -64,12 +67,12 @@ func (s *DatabaseStorage) ensureSchemaTableExists() error {
 	return err
 }
 
-func NewGenericDatabaseStorage(db *sql.DB) Storage {
+func NewPostgresSQLStorage(db *sql.DB) Storage {
 	return &DatabaseStorage{
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version bigint PRIMARY KEY NOT NULL
+				version BIGINT PRIMARY KEY NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)
@@ -81,4 +84,55 @@ func NewGenericDatabaseStorage(db *sql.DB) Storage {
 			SELECT version
 			FROM schema_migrations`,
 	}
+}
+
+func NewMySQLStorage(db *sql.DB) Storage {
+	return &DatabaseStorage{
+		db: db,
+		createTableStatement: `
+			CREATE TABLE IF NOT EXISTS schema_migrations (
+				version BIGINT PRIMARY KEY NOT NULL
+			)`,
+		insertMigrationStatement: `
+			INSERT INTO schema_migrations (version)
+			VALUES (?)`,
+		removeMigrationStatement: `
+			DELETE FROM schema_migrations
+			WHERE version=?`,
+		selectAllMigrationsStatement: `
+			SELECT version
+			FROM schema_migrations`,
+	}
+}
+
+func NewSQLite3Storage(db *sql.DB) Storage {
+	return &DatabaseStorage{
+		db: db,
+		createTableStatement: `
+			CREATE TABLE IF NOT EXISTS schema_migrations (
+				version BIGINT PRIMARY KEY NOT NULL
+			)`,
+		insertMigrationStatement: `
+			INSERT INTO schema_migrations (version)
+			VALUES (?)`,
+		removeMigrationStatement: `
+			DELETE FROM schema_migrations
+			WHERE version=?`,
+		selectAllMigrationsStatement: `
+			SELECT version
+			FROM schema_migrations`,
+	}
+}
+
+func NewDatabaseStorage(driver string, db *sql.DB) (Storage, error) {
+	switch driver {
+	case "postgres":
+		return NewPostgresSQLStorage(db), nil
+	case "mysql":
+		return NewMySQLStorage(db), nil
+	case "sqlite", "sqlite3":
+		return NewMySQLStorage(db), nil
+	}
+
+	return nil, errors.New("unsupported database driver " + driver)
 }
