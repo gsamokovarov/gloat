@@ -29,7 +29,13 @@ type SQLExecutor struct {
 
 // Up applies a migrations.
 func (e *SQLExecutor) Up(migration *Migration, storage Storage) error {
-	if _, err := e.db.Exec(string(migration.UpSQL)); err != nil {
+	tx, err := e.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec(string(migration.UpSQL)); err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -37,7 +43,7 @@ func (e *SQLExecutor) Up(migration *Migration, storage Storage) error {
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 // Down reverses a migrations.
@@ -46,7 +52,13 @@ func (e *SQLExecutor) Down(migration *Migration, storage Storage) error {
 		return IrreversibleError{migration.Version}
 	}
 
-	if _, err := e.db.Exec(string(migration.DownSQL)); err != nil {
+	tx, err := e.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec(string(migration.DownSQL)); err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -54,7 +66,7 @@ func (e *SQLExecutor) Down(migration *Migration, storage Storage) error {
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func NewExecutor(db *sql.DB) Executor {
