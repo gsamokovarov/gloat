@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"os"
 
 	"github.com/gsamokovarov/gloat"
@@ -9,29 +10,27 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var gl gloat.Gloat
-
-func init() {
+func setupGloat() (*gloat.Gloat, error) {
 	connectionString, found := os.LookupEnv("DATABASE_URL")
 	if !found {
-		Exitf(1, "No database config at DATABASE_URL")
+		return nil, errors.New("no database config at DATABASE_URL")
 	}
 
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
-		Exitf(1, "Error: %v\n", err)
+		return nil, err
 	}
 
 	storage, err := gloat.NewDatabaseStorage("postgres", db)
 	if err != nil {
-		Exitf(1, "Error: %v\n", err)
+		return nil, err
 	}
 
-	gl = gloat.Gloat{
+	return &gloat.Gloat{
 		InitialPath: "testdata/migrations",
 
 		Storage:  storage,
 		Source:   gloat.NewFileSystemSource("testdata/migrations"),
 		Executor: gloat.NewExecutor(db),
-	}
+	}, nil
 }

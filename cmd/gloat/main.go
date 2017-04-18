@@ -30,6 +30,11 @@ func main() {
 }
 
 func upCmd() {
+	gl, err := setupGloat()
+	if err != nil {
+		Exitf(1, "Error: %v\n", err)
+	}
+
 	migrations, err := gl.Unapplied()
 	if err != nil {
 		Exitf(1, "Error: %v\n", err)
@@ -53,6 +58,11 @@ func upCmd() {
 }
 
 func downCmd() {
+	gl, err := setupGloat()
+	if err != nil {
+		Exitf(1, "Error: %v\n", err)
+	}
+
 	migration, err := gl.Current()
 	if err != nil {
 		Exitf(1, "Error: %v\n", err)
