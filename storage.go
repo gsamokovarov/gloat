@@ -36,29 +36,27 @@ func (s *DatabaseStorage) Remove(migration *Migration) error {
 	return err
 }
 
-func (s *DatabaseStorage) Collect() (Migrations, error) {
-	if err := s.ensureSchemaTableExists(); err != nil {
-		return nil, err
+func (s *DatabaseStorage) Collect() (migrations Migrations, err error) {
+	if err = s.ensureSchemaTableExists(); err != nil {
+		return
 	}
 
 	rows, err := s.db.Query(s.selectAllMigrationsStatement)
 	if err != nil {
-		return nil, err
+		return
 	}
 	defer rows.Close()
 
-	var migrations Migrations
-
 	for rows.Next() {
-		m := &Migration{}
-		if err := rows.Scan(&m.Version); err != nil {
-			return nil, err
+		migration := &Migration{}
+		if err = rows.Scan(&migration.Version); err != nil {
+			return
 		}
 
-		migrations = append(migrations, m)
+		migrations = append(migrations, migration)
 	}
 
-	return migrations, nil
+	return
 }
 
 func (s *DatabaseStorage) ensureSchemaTableExists() error {
@@ -66,50 +64,12 @@ func (s *DatabaseStorage) ensureSchemaTableExists() error {
 	return err
 }
 
-func NewPostgresSQLStorage(db *sql.DB) Storage {
+func NewGenericDatabaseStorage(db *sql.DB) Storage {
 	return &DatabaseStorage{
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version BIGINT PRIMARY KEY NOT NULL
-			)`,
-		insertMigrationStatement: `
-			INSERT INTO schema_migrations (version)
-			VALUES ($1)`,
-		removeMigrationStatement: `
-			DELETE FROM schema_migrations
-			WHERE version=$1`,
-		selectAllMigrationsStatement: `
-			SELECT version
-			FROM schema_migrations`,
-	}
-}
-
-func NewMySQLStorage(db *sql.DB) Storage {
-	return &DatabaseStorage{
-		db: db,
-		createTableStatement: `
-			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version BIGINT PRIMARY KEY NOT NULL
-			)`,
-		insertMigrationStatement: `
-			INSERT INTO schema_migrations (version)
-			VALUES ($1)`,
-		removeMigrationStatement: `
-			DELETE FROM schema_migrations
-			WHERE version=$1`,
-		selectAllMigrationsStatement: `
-			SELECT version
-			FROM schema_migrations`,
-	}
-}
-
-func NewSQLite3Storage(db *sql.DB) Storage {
-	return &DatabaseStorage{
-		db: db,
-		createTableStatement: `
-			CREATE TABLE IF NOT EXISTS schema_migrations (
-				version BIGINT PRIMARY KEY NOT NULL
+				version bigint PRIMARY KEY NOT NULL
 			)`,
 		insertMigrationStatement: `
 			INSERT INTO schema_migrations (version)

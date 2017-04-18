@@ -26,7 +26,7 @@ func init() {
 		InitialPath: "testdata/migrations",
 
 		Source:   gloat.NewFileSystemSource("testdata/migrations"),
-		Storage:  gloat.NewPostgresSQLStorage(db),
+		Storage:  gloat.NewGenericDatabaseStorage(db),
 		Executor: gloat.NewExecutor(db),
 	}
 }
