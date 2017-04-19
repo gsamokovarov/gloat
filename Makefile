@@ -1,6 +1,7 @@
 .PHONY: build
 build:
-	@go build github.com/gsamokovarov/gloat/cmd/gloat
+	@mkdir -p bin
+	@go build -o bin/gloat github.com/gsamokovarov/gloat/gloat
 
 .PHONY: test
 test:

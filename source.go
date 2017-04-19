@@ -45,6 +45,8 @@ func (s *FileSystemSource) Collect() (migrations Migrations, err error) {
 	return
 }
 
+// NewFileSystemSource creates a new source of migrations that takes them right
+// out of the file system.
 func NewFileSystemSource(migrationsFolder string) Source {
 	return &FileSystemSource{MigrationsFolder: migrationsFolder}
 }
