@@ -1,0 +1,21 @@
+language: go
+
+go:
+  - 1.6
+  - 1.7
+  - 1.8
+  - master
+
+before_install:
+  - 'psql  -c "create database gloat_test;" -U postgres'
+
+install:
+  - go get github.com/go-sql-driver/mysql
+	- go get github.com/lib/pq
+	- go get github.com/mattn/go-sqlite3
+  - make test
+
+env:
+  global:
+    - "DATABASE_URL=postgres://postgres@localhost/gloat_test"
+    - "DATABASE_SRC=testdata/migrations"
