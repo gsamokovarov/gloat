@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gsamokovarov/gloat"
 
@@ -15,59 +17,58 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const helpMsg = `Usage gloat: [COMMAND ...]
+const usage = `Usage gloat: [OPTION ...] [COMMAND ...]
 
 Gloat is a Go SQL migration utility.
 
 Commands:
+  new           Create a new migration folder
   up            Apply new migrations
   down          Revert the last applied migration
 
 Options:
   -src          The folder with migrations
-                (default $DATABASE_MIGRATIONS" or db/migrations)
+                (default $DATABASE_SRC" or db/migrations)
   -url          The database connection URL
                 (default $DATABASE_URL)
   -help         Show this message
 `
 
-var (
-	urlFlag string
-	srcFlag string
-)
+type arguments struct {
+	url  string
+	src  string
+	rest []string
+}
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, helpMsg)
-		os.Exit(1)
-	}
-
 	args := parseArguments()
 
 	var cmdName string
-	if len(args) > 0 {
-		cmdName = args[0]
+	if len(args.rest) > 0 {
+		cmdName = args.rest[0]
 	}
 
 	var err error
 	switch cmdName {
 	case "up":
-		err = upCmd()
+		err = upCmd(args)
 	case "down":
-		err = downCmd()
+		err = downCmd(args)
+	case "new":
+		err = newCmd(args)
 	default:
-		fmt.Fprintf(os.Stderr, helpMsg)
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, usage)
+		os.Exit(2)
 	}
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 }
 
-func upCmd() error {
-	gl, err := setupGloat()
+func upCmd(args arguments) error {
+	gl, err := setupGloat(args)
 	if err != nil {
 		return err
 	}
@@ -80,7 +81,7 @@ func upCmd() error {
 	appliedMigrations := map[int64]bool{}
 
 	for _, migration := range migrations {
-		fmt.Printf("Applying migration: %d...\n", migration.Version)
+		fmt.Printf("Applying: %d...\n", migration.Version)
 
 		if err := gl.Apply(migration); err != nil {
 			return err
@@ -96,8 +97,8 @@ func upCmd() error {
 	return nil
 }
 
-func downCmd() error {
-	gl, err := setupGloat()
+func downCmd(args arguments) error {
+	gl, err := setupGloat(args)
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,7 @@ func downCmd() error {
 		return nil
 	}
 
-	fmt.Printf("Reverting migration: %d...\n", migration.Version)
+	fmt.Printf("Reverting: %d...\n", migration.Version)
 
 	if err := gl.Revert(migration); err != nil {
 		return err
@@ -121,57 +122,84 @@ func downCmd() error {
 	return nil
 }
 
-func parseArguments() []string {
+func newCmd(args arguments) error {
+	if _, err := os.Stat(args.src); os.IsNotExist(err) {
+		return err
+	}
+
+	if len(args.rest) < 2 {
+		return errors.New("new requires a migration name given as an argument")
+	}
+
+	migration := gloat.GenerateMigration(strings.Join(args.rest[1:], "_"))
+	migrationDirectoryPath := filepath.Join(args.src, migration.Path)
+
+	if err := os.MkdirAll(migrationDirectoryPath, 0755); err != nil {
+		return err
+	}
+
+	f, err := os.Create(filepath.Join(migrationDirectoryPath, "up.sql"))
+	if err != nil {
+		return err
+	}
+	f.Close()
+
+	f, err = os.Create(filepath.Join(migrationDirectoryPath, "down.sql"))
+	if err != nil {
+		return err
+	}
+	f.Close()
+
+	fmt.Printf("Created %s\n", migrationDirectoryPath)
+
+	return nil
+}
+
+func parseArguments() arguments {
+	var args arguments
+
 	urlDefault := os.Getenv("DATABASE_URL")
 	urlUsage := `database connection url`
-	flag.StringVar(&urlFlag, "url", urlDefault, urlUsage)
 
-	srcDefault := os.Getenv("DATABASE_MIGRATIONS")
+	srcDefault := os.Getenv("DATABASE_SRC")
 	if srcDefault == "" {
 		srcDefault = "db/migrations"
 	}
 	srcUsage := `the folder with migrations`
-	flag.StringVar(&srcFlag, "src", srcDefault, srcUsage)
+
+	flag.StringVar(&args.url, "url", urlDefault, urlUsage)
+	flag.StringVar(&args.src, "src", srcDefault, srcUsage)
+
+	flag.Usage = func() { fmt.Fprintf(os.Stderr, usage) }
 
 	flag.Parse()
 
-	return flag.Args()
+	args.rest = flag.Args()
+
+	return args
 }
 
-func setupGloat() (*gloat.Gloat, error) {
-	if urlFlag == "" {
-		return nil, errors.New("no -url or $DATABASE_URL present")
-	}
-
-	driver, err := guessDriver()
+func setupGloat(args arguments) (*gloat.Gloat, error) {
+	u, err := url.Parse(args.url)
 	if err != nil {
 		return nil, err
 	}
 
-	db, err := sql.Open(driver, urlFlag)
+	db, err := sql.Open(u.Scheme, args.url)
 	if err != nil {
 		return nil, err
 	}
 
-	storage, err := gloat.NewDatabaseStorage(driver, db)
+	storage, err := gloat.NewDatabaseStorage(u.Scheme, db)
 	if err != nil {
 		return nil, err
 	}
 
 	return &gloat.Gloat{
-		InitialPath: srcFlag,
+		InitialPath: args.src,
 
 		Storage:  storage,
-		Source:   gloat.NewFileSystemSource(srcFlag),
+		Source:   gloat.NewFileSystemSource(args.src),
 		Executor: gloat.NewExecutor(db),
 	}, nil
-}
-
-func guessDriver() (string, error) {
-	parsed, err := url.Parse(urlFlag)
-	if err != nil {
-		return "", err
-	}
-
-	return parsed.Scheme, nil
 }
