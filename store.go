@@ -5,14 +5,14 @@ import (
 	"errors"
 )
 
-type Storage interface {
+type Store interface {
 	Source
 
 	Insert(*Migration) error
 	Remove(*Migration) error
 }
 
-type DatabaseStorage struct {
+type DatabaseStore struct {
 	db *sql.DB
 
 	createTableStatement         string
@@ -21,7 +21,7 @@ type DatabaseStorage struct {
 	selectAllMigrationsStatement string
 }
 
-func (s *DatabaseStorage) Insert(migration *Migration) error {
+func (s *DatabaseStore) Insert(migration *Migration) error {
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (s *DatabaseStorage) Insert(migration *Migration) error {
 	return err
 }
 
-func (s *DatabaseStorage) Remove(migration *Migration) error {
+func (s *DatabaseStore) Remove(migration *Migration) error {
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (s *DatabaseStorage) Remove(migration *Migration) error {
 	return err
 }
 
-func (s *DatabaseStorage) Collect() (migrations Migrations, err error) {
+func (s *DatabaseStore) Collect() (migrations Migrations, err error) {
 	if err = s.ensureSchemaTableExists(); err != nil {
 		return
 	}
@@ -62,13 +62,13 @@ func (s *DatabaseStorage) Collect() (migrations Migrations, err error) {
 	return
 }
 
-func (s *DatabaseStorage) ensureSchemaTableExists() error {
+func (s *DatabaseStore) ensureSchemaTableExists() error {
 	_, err := s.db.Exec(s.createTableStatement)
 	return err
 }
 
-func NewPostgresSQLStorage(db *sql.DB) Storage {
-	return &DatabaseStorage{
+func NewPostgresSQLStore(db *sql.DB) Store {
+	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -86,8 +86,8 @@ func NewPostgresSQLStorage(db *sql.DB) Storage {
 	}
 }
 
-func NewMySQLStorage(db *sql.DB) Storage {
-	return &DatabaseStorage{
+func NewMySQLStore(db *sql.DB) Store {
+	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -105,8 +105,8 @@ func NewMySQLStorage(db *sql.DB) Storage {
 	}
 }
 
-func NewSQLite3Storage(db *sql.DB) Storage {
-	return &DatabaseStorage{
+func NewSQLite3Store(db *sql.DB) Store {
+	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
 			CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -124,14 +124,14 @@ func NewSQLite3Storage(db *sql.DB) Storage {
 	}
 }
 
-func NewDatabaseStorage(driver string, db *sql.DB) (Storage, error) {
+func NewDatabaseStore(driver string, db *sql.DB) (Store, error) {
 	switch driver {
 	case "postgres":
-		return NewPostgresSQLStorage(db), nil
+		return NewPostgresSQLStore(db), nil
 	case "mysql":
-		return NewMySQLStorage(db), nil
+		return NewMySQLStore(db), nil
 	case "sqlite", "sqlite3":
-		return NewMySQLStorage(db), nil
+		return NewMySQLStore(db), nil
 	}
 
 	return nil, errors.New("unsupported database driver " + driver)

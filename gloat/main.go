@@ -190,7 +190,7 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 		return nil, err
 	}
 
-	storage, err := gloat.NewDatabaseStorage(u.Scheme, db)
+	store, err := gloat.NewDatabaseStore(u.Scheme, db)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 	return &gloat.Gloat{
 		InitialPath: args.src,
 
-		Storage:  storage,
+		Store:  store,
 		Source:   gloat.NewFileSystemSource(args.src),
 		Executor: gloat.NewExecutor(db),
 	}, nil

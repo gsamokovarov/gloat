@@ -156,8 +156,8 @@ func (m Migrations) Current() *Migration {
 }
 
 // UnappliedMigrations selects the unapplied migrations from a Source. For a
-// migration to be unapplied it should not be present in the Storage.
-func UnappliedMigrations(source Source, storage Storage) (Migrations, error) {
+// migration to be unapplied it should not be present in the Store.
+func UnappliedMigrations(source Source, store Store) (Migrations, error) {
 	allMigrations, err := source.Collect()
 	if err != nil {
 		return nil, err

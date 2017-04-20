@@ -18,8 +18,8 @@ func (err IrreversibleError) Error() string {
 
 // Executor is a type that executes migrations up and down.
 type Executor interface {
-	Up(*Migration, Storage) error
-	Down(*Migration, Storage) error
+	Up(*Migration, Store) error
+	Down(*Migration, Store) error
 }
 
 // Executor is a type that executes migrations in a database.
@@ -28,7 +28,7 @@ type SQLExecutor struct {
 }
 
 // Up applies a migrations.
-func (e *SQLExecutor) Up(migration *Migration, storage Storage) error {
+func (e *SQLExecutor) Up(migration *Migration, store Store) error {
 	tx, err := e.db.Begin()
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (e *SQLExecutor) Up(migration *Migration, storage Storage) error {
 }
 
 // Down reverses a migrations.
-func (e *SQLExecutor) Down(migration *Migration, storage Storage) error {
+func (e *SQLExecutor) Down(migration *Migration, store Store) error {
 	if !migration.Reversible() {
 		return IrreversibleError{migration.Version}
 	}

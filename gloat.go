@@ -12,9 +12,9 @@ type Gloat struct {
 	// embedded migrations with go-bindata, etc.
 	Source Source
 
-	// Storage is the place where we store the applied migration versions. Can
-	// be one of the builtin database storages, etc.
-	Storage Storage
+	// Store is the place where we store the applied migration versions. Can
+	// be one of the builtin database stores, etc.
+	Store Store
 
 	// Executor applies migrations and marks the newly applied migration
 	// versions in the Store.
@@ -23,7 +23,7 @@ type Gloat struct {
 
 // Unapplied returns the unapplied migrations in the current gloat.
 func (c *Gloat) Unapplied() (Migrations, error) {
-	return UnappliedMigrations(c.Source, c.Storage)
+	return UnappliedMigrations(c.Source, c.Store)
 }
 
 // Current returns the latest applied migration. Even if no error is returned,
@@ -32,7 +32,7 @@ func (c *Gloat) Unapplied() (Migrations, error) {
 // This is the case when the last applied migration is no longer available from
 // the source or there are no migrations to begin with.
 func (c *Gloat) Current() (*Migration, error) {
-	appliedMigrations, err := c.Storage.Collect()
+	appliedMigrations, err := c.Store.Collect()
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +60,10 @@ func (c *Gloat) Current() (*Migration, error) {
 
 // Apply applies a migration.
 func (c *Gloat) Apply(migration *Migration) error {
-	return c.Executor.Up(migration, c.Storage)
+	return c.Executor.Up(migration, c.Store)
 }
 
 // Revert rollbacks a migration.
 func (c *Gloat) Revert(migration *Migration) error {
-	return c.Executor.Down(migration, c.Storage)
+	return c.Executor.Down(migration, c.Store)
 }
