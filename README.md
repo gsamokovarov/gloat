@@ -1,5 +1,7 @@
 <p align=right>
-	[![Build Status](https://travis-ci.org/gsamokovarov/gloat.svg?branch=master)](https://travis-ci.org/gsamokovarov/gloat)
+	<a href="https://travis-ci.org/gsamokovarov/gloat">
+		<img src="https://travis-ci.org/gsamokovarov/gloat.svg?branch=master" alt="Build Status" data-canonical-src="https://travis-ci.org/gsamokovarov/gloat.svg?branch=master">
+	</a>
 </p>
 
 # Gloat /ɡlōt/
