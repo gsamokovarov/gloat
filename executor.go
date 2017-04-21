@@ -69,6 +69,7 @@ func (e *SQLExecutor) Down(migration *Migration, store Store) error {
 	return tx.Commit()
 }
 
-func NewExecutor(db *sql.DB) Executor {
+// NewSQLExecutor creates an SQLExecutor.
+func NewSQLExecutor(db *sql.DB) Executor {
 	return &SQLExecutor{db: db}
 }

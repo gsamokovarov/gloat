@@ -8,7 +8,7 @@ import (
 func TestSQLExecutor_Up(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
-	exe := NewExecutor(db)
+	exe := NewSQLExecutor(db)
 
 	migration, err := MigrationFromPath(td)
 	if err != nil {
@@ -29,7 +29,7 @@ func TestSQLExecutor_Up(t *testing.T) {
 func TestSQLExecutor_Down(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
-	exe := NewExecutor(db)
+	exe := NewSQLExecutor(db)
 
 	migration, err := MigrationFromPath(td)
 	if err != nil {

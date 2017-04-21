@@ -198,6 +198,6 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 	return &gloat.Gloat{
 		Store:    store,
 		Source:   gloat.NewFileSystemSource(args.src),
-		Executor: gloat.NewExecutor(db),
+		Executor: gloat.NewSQLExecutor(db),
 	}, nil
 }
