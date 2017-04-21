@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	// Needed to establish database connections during testing.
@@ -185,6 +186,17 @@ func init() {
 		}
 
 		dbDriver = u.Scheme
+	}
+
+	// Do a bit of post-processing so we can connect to non-postgres databases.
+	if dbDriver != "postgres" {
+		parts := strings.SplitN(dbUrl, "://", 2)
+
+		if len(parts) != 2 {
+			panic("Cannot split " + dbUrl + " into parts")
+		}
+
+		dbUrl = parts[1]
 	}
 
 	{
