@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestExecutorUp(t *testing.T) {
+func TestSQLExecutor_Up(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
 	exe := NewExecutor(db)
@@ -20,14 +20,13 @@ func TestExecutorUp(t *testing.T) {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		_, err := db.Exec(`SELECT id FROM users LIMIT 1`)
-		if err != nil {
+		if _, err := db.Exec(`SELECT id FROM users LIMIT 1`); err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 	})
 }
 
-func TestExecutorDown(t *testing.T) {
+func TestSQLExecutor_Down(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
 	exe := NewExecutor(db)
@@ -46,8 +45,7 @@ func TestExecutorDown(t *testing.T) {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		_, err := db.Exec(`SELECT id FROM users LIMIT 1`)
-		if err == nil {
+		if _, err := db.Exec(`SELECT id FROM users LIMIT 1`); err == nil {
 			t.Error("Expected table users to be dropped")
 		}
 	})
