@@ -10,7 +10,6 @@ before_install:
   - psql  -c "CREATE DATABASE gloat_test;" -U postgres
   - mysql -e 'CREATE DATABASE myapp_test;'
 
-
 install:
   - go get github.com/go-sql-driver/mysql
   - go get github.com/lib/pq
