@@ -56,8 +56,9 @@ func GenerateMigration(str string) *Migration {
 // MigrationFromPath builds a Migration struct from a path of a directory structure
 // like the one below:
 //
-// migrations/20170329154959_introduce_domain_model/up.sql
-// migrations/20170329154959_introduce_domain_model/down.sql
+// 20170329154959_introduce_domain_model/
+// ├── down.sql
+// └── up.sql
 //
 // If the path does not exist or does not follow the name conventions, an error
 // could be returned.
