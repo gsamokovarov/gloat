@@ -39,7 +39,7 @@ func (e *SQLExecutor) Up(migration *Migration, store Store) error {
 		return err
 	}
 
-	if err := storage.Insert(migration); err != nil {
+	if err := store.Insert(migration); err != nil {
 		return err
 	}
 
@@ -62,7 +62,7 @@ func (e *SQLExecutor) Down(migration *Migration, store Store) error {
 		return err
 	}
 
-	if err := storage.Remove(migration); err != nil {
+	if err := store.Remove(migration); err != nil {
 		return err
 	}
 

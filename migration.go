@@ -22,7 +22,7 @@ var (
 // Migration holds all the relevant information for a migration. The content of
 // the UP side, the DOWN side, a path and version. The version is used to
 // determine the order of which the migrations would be executed. The pad is
-// the name in a storage.
+// the name in a store.
 type Migration struct {
 	UpSQL   []byte
 	DownSQL []byte
@@ -163,7 +163,7 @@ func UnappliedMigrations(source Source, store Store) (Migrations, error) {
 		return nil, err
 	}
 
-	appliedMigrations, err := storage.Collect()
+	appliedMigrations, err := store.Collect()
 	if err != nil {
 		return nil, err
 	}
