@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+// Store is an interface representing a place where the applied migrations are
+// recorded.
 type Store interface {
 	Source
 
@@ -12,6 +14,9 @@ type Store interface {
 	Remove(*Migration) error
 }
 
+// DatabaseStore is a Store that keeps the applied migrations in a database
+// table called schema_migrations. The table is automatically created if it
+// does not exist.
 type DatabaseStore struct {
 	db *sql.DB
 
@@ -21,6 +26,7 @@ type DatabaseStore struct {
 	selectAllMigrationsStatement string
 }
 
+// Insert records a migration version into the schema_migrations table.
 func (s *DatabaseStore) Insert(migration *Migration) error {
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
@@ -30,6 +36,7 @@ func (s *DatabaseStore) Insert(migration *Migration) error {
 	return err
 }
 
+// Remove removes a migration version from the schema_migrations table.
 func (s *DatabaseStore) Remove(migration *Migration) error {
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
@@ -39,6 +46,8 @@ func (s *DatabaseStore) Remove(migration *Migration) error {
 	return err
 }
 
+// Collect builds a slice of migrations with the versions of the recorded
+// applied migrations.
 func (s *DatabaseStore) Collect() (migrations Migrations, err error) {
 	if err = s.ensureSchemaTableExists(); err != nil {
 		return
@@ -67,7 +76,8 @@ func (s *DatabaseStore) ensureSchemaTableExists() error {
 	return err
 }
 
-func NewPostgresSQLStore(db *sql.DB) Store {
+// NewPostgreSQLStore creates a Store for PostgreSQL.
+func NewPostgreSQLStore(db *sql.DB) Store {
 	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
@@ -86,6 +96,7 @@ func NewPostgresSQLStore(db *sql.DB) Store {
 	}
 }
 
+// NewMySQLStore creates a Store for MySQL.
 func NewMySQLStore(db *sql.DB) Store {
 	return &DatabaseStore{
 		db: db,
@@ -105,6 +116,7 @@ func NewMySQLStore(db *sql.DB) Store {
 	}
 }
 
+// NewSQLite3Store creates a Store for SQLite3.
 func NewSQLite3Store(db *sql.DB) Store {
 	return &DatabaseStore{
 		db: db,
@@ -124,10 +136,12 @@ func NewSQLite3Store(db *sql.DB) Store {
 	}
 }
 
+// NewDatabaseStore creates a store for an RDBMS hinted by a driver string. The
+// supported drivers are: postgres, mysql, sqlite and sqlite3.
 func NewDatabaseStore(driver string, db *sql.DB) (Store, error) {
 	switch driver {
 	case "postgres":
-		return NewPostgresSQLStore(db), nil
+		return NewPostgreSQLStore(db), nil
 	case "mysql":
 		return NewMySQLStore(db), nil
 	case "sqlite", "sqlite3":
