@@ -18,7 +18,8 @@ install:
 
 env:
   global:
-    - "DATABASE_SRC=testdata/migrations"
+    - DATABASE_SRC=testdata/migrations
   matrix:
-    - "DATABASE_URL=postgres://postgres@localhost/gloat_test"
-    - "DATABASE_URL=mysql://travis@localhost/gloat_test"
+    - DATABASE_URL='postgres://postgres@localhost/gloat_test?sslmode=disable'
+    - DATABASE_URL='mysql://travis@127.0.0.1/gloat_test'
+    - DATABASE_URL='sqlite://localhost/:memory:'
