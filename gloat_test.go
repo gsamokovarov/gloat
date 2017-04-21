@@ -1,26 +1,43 @@
 package gloat
 
-import "testing"
+import (
+	"database/sql"
+	"net/url"
+	"os"
+	"testing"
 
-var gl Gloat
+	//
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+)
 
-type testingStorage struct{ applied Migrations }
+var (
+	gl Gloat
 
-func (s *testingStorage) Collect() (Migrations, error)      { return s.applied, nil }
-func (s *testingStorage) Insert(migration *Migration) error { return nil }
-func (s *testingStorage) Remove(migration *Migration) error { return nil }
+	db       *sql.DB
+	dbUrl    string
+	dbSrc    string
+	dbDriver string
+)
+
+type testingStore struct{ applied Migrations }
+
+func (s *testingStore) Collect() (Migrations, error)      { return s.applied, nil }
+func (s *testingStore) Insert(migration *Migration) error { return nil }
+func (s *testingStore) Remove(migration *Migration) error { return nil }
 
 type testingExecutor struct{}
 
-func (e *testingExecutor) Up(*Migration, Storage) error   { return nil }
-func (e *testingExecutor) Down(*Migration, Storage) error { return nil }
+func (e *testingExecutor) Up(*Migration, Store) error   { return nil }
+func (e *testingExecutor) Down(*Migration, Store) error { return nil }
 
 type stubbedExecutor struct {
-	up   func(*Migration, Storage) error
-	down func(*Migration, Storage) error
+	up   func(*Migration, Store) error
+	down func(*Migration, Store) error
 }
 
-func (e *stubbedExecutor) Up(m *Migration, s Storage) error {
+func (e *stubbedExecutor) Up(m *Migration, s Store) error {
 	if e.up != nil {
 		return e.up(m, s)
 	}
@@ -28,7 +45,7 @@ func (e *stubbedExecutor) Up(m *Migration, s Storage) error {
 	return nil
 }
 
-func (e *stubbedExecutor) Down(m *Migration, s Storage) error {
+func (e *stubbedExecutor) Down(m *Migration, s Store) error {
 	if e.down != nil {
 		e.down(m, s)
 	}
@@ -37,7 +54,7 @@ func (e *stubbedExecutor) Down(m *Migration, s Storage) error {
 }
 
 func TestUnapplied(t *testing.T) {
-	gl.Storage = &testingStorage{applied: Migrations{}}
+	gl.Store = &testingStore{applied: Migrations{}}
 
 	migrations, err := gl.Unapplied()
 	if err != nil {
@@ -50,7 +67,7 @@ func TestUnapplied(t *testing.T) {
 }
 
 func TestUnapplied_Empty(t *testing.T) {
-	gl.Storage = &testingStorage{
+	gl.Store = &testingStore{
 		applied: Migrations{
 			&Migration{Version: 20170329154959},
 		},
@@ -67,7 +84,7 @@ func TestUnapplied_Empty(t *testing.T) {
 }
 
 func TestCurrent(t *testing.T) {
-	gl.Storage = &testingStorage{
+	gl.Store = &testingStore{
 		applied: Migrations{
 			&Migration{Version: 20170329154959},
 		},
@@ -88,7 +105,7 @@ func TestCurrent(t *testing.T) {
 }
 
 func TestCurrent_Nil(t *testing.T) {
-	gl.Storage = &testingStorage{}
+	gl.Store = &testingStore{}
 
 	migration, err := gl.Current()
 	if err != nil {
@@ -103,9 +120,9 @@ func TestCurrent_Nil(t *testing.T) {
 func TestApply(t *testing.T) {
 	called := false
 
-	gl.Storage = &testingStorage{}
+	gl.Store = &testingStore{}
 	gl.Executor = &stubbedExecutor{
-		up: func(*Migration, Storage) error {
+		up: func(*Migration, Store) error {
 			called = true
 			return nil
 		},
@@ -121,9 +138,9 @@ func TestApply(t *testing.T) {
 func TestRevert(t *testing.T) {
 	called := false
 
-	gl.Storage = &testingStorage{}
+	gl.Store = &testingStore{}
 	gl.Executor = &stubbedExecutor{
-		down: func(*Migration, Storage) error {
+		down: func(*Migration, Store) error {
 			called = true
 			return nil
 		},
@@ -141,5 +158,30 @@ func init() {
 		InitialPath: "testdata/migrations",
 		Source:      NewFileSystemSource("testdata/migrations"),
 		Executor:    &testingExecutor{},
+	}
+
+	dbUrl = os.Getenv("DATABASE_URL")
+	dbSrc = os.Getenv("DATABASE_SRC")
+
+	{
+		u, err := url.Parse(dbUrl)
+		if err != nil {
+			panic(err)
+		}
+
+		dbDriver = u.Scheme
+	}
+
+	{
+		var err error
+
+		db, err = sql.Open(dbDriver, dbUrl)
+		if err != nil {
+			panic(err)
+		}
+
+		if err := db.Ping(); err != nil {
+			panic(err)
+		}
 	}
 }
