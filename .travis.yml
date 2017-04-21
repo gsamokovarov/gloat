@@ -4,15 +4,22 @@ go:
   - 1.8
   - master
 
-before_install:
-  - psql  -c "CREATE DATABASE gloat_test;" -U postgres
-  - mysql -e 'CREATE DATABASE myapp_test;'
-
 install:
   - go get github.com/go-sql-driver/mysql
   - go get github.com/lib/pq
   - go get github.com/mattn/go-sqlite3
+
+before_script:
+  - psql  -c "CREATE DATABASE gloat_test;" -U postgres
+  - mysql -e 'CREATE DATABASE myapp_test;'
+
+script:
   - make test
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: master
 
 env:
   global:
