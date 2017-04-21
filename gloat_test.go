@@ -171,9 +171,8 @@ func TestRevert(t *testing.T) {
 
 func init() {
 	gl = Gloat{
-		InitialPath: "testdata/migrations",
-		Source:      NewFileSystemSource("testdata/migrations"),
-		Executor:    &testingExecutor{},
+		Source:   NewFileSystemSource("testdata/migrations"),
+		Executor: &testingExecutor{},
 	}
 
 	dbUrl = os.Getenv("DATABASE_URL")

@@ -196,9 +196,7 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 	}
 
 	return &gloat.Gloat{
-		InitialPath: args.src,
-
-		Store:  store,
+		Store:    store,
 		Source:   gloat.NewFileSystemSource(args.src),
 		Executor: gloat.NewExecutor(db),
 	}, nil

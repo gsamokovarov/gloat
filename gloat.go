@@ -3,17 +3,12 @@ package gloat
 // Gloat glues all the components needed to apply and revert
 // migrations.
 type Gloat struct {
-	// InitialPath is the base path to the source of the migrations. If the
-	// source is a File System, this can be the folder storing all of the
-	// migrations.
-	InitialPath string
-
 	// Source is an incoming source of migrations. It can be File System or
 	// embedded migrations with go-bindata, etc.
 	Source Source
 
 	// Store is the place where we store the applied migration versions. Can
-	// be one of the builtin database stores, etc.
+	// be one of the builtin database store or custom file storage, etc.
 	Store Store
 
 	// Executor applies migrations and marks the newly applied migration
