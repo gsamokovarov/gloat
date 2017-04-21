@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	//
+	// Needed to establish database connections during testing.
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -49,6 +49,21 @@ func (e *stubbedExecutor) Down(m *Migration, s Store) error {
 	if e.down != nil {
 		e.down(m, s)
 	}
+
+	return nil
+}
+
+func cleanState(fn func()) error {
+	_, err := db.Exec(`
+		DROP TABLE IF EXISTS schema_migrations;	
+		DROP TABLE IF EXISTS users;	
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	fn()
 
 	return nil
 }

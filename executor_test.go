@@ -52,18 +52,3 @@ func TestExecutorDown(t *testing.T) {
 		}
 	})
 }
-
-func cleanState(fn func()) error {
-	_, err := db.Exec(`
-		DROP TABLE IF EXISTS schema_migrations;	
-		DROP TABLE IF EXISTS users;	
-	`)
-
-	if err != nil {
-		return err
-	}
-
-	fn()
-
-	return nil
-}
