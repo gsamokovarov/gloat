@@ -7,6 +7,10 @@ build:
 test:
 	@go test ./...
 
+.PHONY: test
+test.sqlite:
+	@env DATABASE_URL=sqlite3://:memory: go test ./...
+
 .PHONY: lint
 lint:
 	@go vet ./... && golint ./...
