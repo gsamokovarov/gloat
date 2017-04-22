@@ -170,18 +170,18 @@ Here is a description for the main Gloat methods.
 
 ```go
 // Unapplied returns the unapplied migrations in the current gloat.
-func (c *Gloat) Unapplied() (Migrations, error)
+func (c *Gloat) Unapplied() (Migrations, error) {}
 
 // Current returns the latest applied migration. Even if no error is returned,
 // the current migration can be nil.
 //
 // This is the case when the last applied migration is no longer available from
 // the source or there are no migrations to begin with.
-func (c *Gloat) Current() (*Migration, error)
+func (c *Gloat) Current() (*Migration, error) {}
 
 // Apply applies a migration.
-func (c *Gloat) Apply(migration *Migration) error
+func (c *Gloat) Apply(migration *Migration) error {}
 
 // Revert rollbacks a migration.
-func (c *Gloat) Revert(migration *Migration) error
+func (c *Gloat) Revert(migration *Migration) error {}
 ```
