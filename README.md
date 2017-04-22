@@ -14,9 +14,9 @@ a library, gloat can be easily integrated into your application or ORM.
 
 ## Library
 
-If you are using gloat as a library, there are 3 main components you need to
-understand. A migration source, migration storage, migration executor and a
-Gloat struct that binds them all together.
+If you are using gloat as a library, the main components you'll be dealing with
+are migration, source, store and SQL executor. You'll be using those through the
+methods on the `Gloat` struct.
 
 ```go
 db, err := sql.Open("postgres", "connection string")
@@ -37,6 +37,22 @@ gl := Gloat{
 }
 ```
 
+### Migration
+
+Migration holds all the relevant information for a migration. The content of
+the forward (up) side of a migration, the backward (down) side, a path and
+version. The version is used to determine the order of which the migrations
+would be executed. The path is the name in a store.
+
+```go
+type Migration struct {
+	UpSQL   []byte
+	DownSQL []byte
+	Path    string
+	Version int64
+}
+```
+
 ### Source
 
 The `Source` interface represents a source of migration. The most common source
@@ -49,8 +65,8 @@ type Source interface {
 ```
 
 
-`gloat.NewFileSystemSource` is a constructor function that creates a storage in
-which collects migrations from a folder with the following structure:
+`gloat.NewFileSystemSource` is a constructor function that creates a source
+that collects migrations from a folder with the following structure:
 
 ```
 migrations/
@@ -148,4 +164,24 @@ if migrations, err := gl.Unapplied(); err == nil {
 if migration, err := gl.Current(); err == nil {
 	gl.Revert(migration)
 }
+```
+
+Here is a description for the main Gloat methods.
+
+```go
+// Unapplied returns the unapplied migrations in the current gloat.
+func (c *Gloat) Unapplied() (Migrations, error)
+
+// Current returns the latest applied migration. Even if no error is returned,
+// the current migration can be nil.
+//
+// This is the case when the last applied migration is no longer available from
+// the source or there are no migrations to begin with.
+func (c *Gloat) Current() (*Migration, error)
+
+// Apply applies a migration.
+func (c *Gloat) Apply(migration *Migration) error
+
+// Revert rollbacks a migration.
+func (c *Gloat) Revert(migration *Migration) error
 ```

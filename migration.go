@@ -21,7 +21,7 @@ var (
 
 // Migration holds all the relevant information for a migration. The content of
 // the UP side, the DOWN side, a path and version. The version is used to
-// determine the order of which the migrations would be executed. The pad is
+// determine the order of which the migrations would be executed. The path is
 // the name in a store.
 type Migration struct {
 	UpSQL   []byte
