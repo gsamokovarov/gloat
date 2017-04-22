@@ -22,7 +22,7 @@ type Executor interface {
 	Down(*Migration, Store) error
 }
 
-// Executor is a type that executes migrations in a database.
+// SQLExecutor is a type that executes migrations in a database.
 type SQLExecutor struct {
 	db *sql.DB
 }

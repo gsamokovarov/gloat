@@ -17,7 +17,7 @@ var (
 	gl Gloat
 
 	db       *sql.DB
-	dbUrl    string
+	dbURL    string
 	dbSrc    string
 	dbDriver string
 )
@@ -175,11 +175,11 @@ func init() {
 		Executor: &testingExecutor{},
 	}
 
-	dbUrl = os.Getenv("DATABASE_URL")
+	dbURL = os.Getenv("DATABASE_URL")
 	dbSrc = os.Getenv("DATABASE_SRC")
 
 	{
-		u, err := url.Parse(dbUrl)
+		u, err := url.Parse(dbURL)
 		if err != nil {
 			panic(err)
 		}
@@ -189,19 +189,19 @@ func init() {
 
 	// Do a bit of post-processing so we can connect to non-postgres databases.
 	if dbDriver != "postgres" {
-		parts := strings.SplitN(dbUrl, "://", 2)
+		parts := strings.SplitN(dbURL, "://", 2)
 
 		if len(parts) != 2 {
-			panic("Cannot split " + dbUrl + " into parts")
+			panic("Cannot split " + dbURL + " into parts")
 		}
 
-		dbUrl = parts[1]
+		dbURL = parts[1]
 	}
 
 	{
 		var err error
 
-		db, err = sql.Open(dbDriver, dbUrl)
+		db, err = sql.Open(dbDriver, dbURL)
 		if err != nil {
 			panic(err)
 		}

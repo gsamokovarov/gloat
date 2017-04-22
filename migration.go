@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	Now = time.Now()
+	now = time.Now()
 
 	nameNormalizerRe = regexp.MustCompile(`([a-z])([A-Z])`)
 	versionFormat    = "20060319150405"
@@ -92,7 +92,7 @@ func generateMigrationPath(version int64, str string) string {
 }
 
 func generateVersion() int64 {
-	version, _ := strconv.ParseInt(Now.Format(versionFormat), 10, 64)
+	version, _ := strconv.ParseInt(now.Format(versionFormat), 10, 64)
 	return version
 }
 
