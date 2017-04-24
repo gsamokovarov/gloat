@@ -16,7 +16,7 @@ var (
 	now = time.Now()
 
 	nameNormalizerRe = regexp.MustCompile(`([a-z])([A-Z])`)
-	versionFormat    = "20060319150405"
+	versionFormat    = "20060102150405"
 )
 
 // Migration holds all the relevant information for a migration. The content of
