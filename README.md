@@ -30,7 +30,7 @@ if err != nil {
 	// error indicates unsuported one.
 }
 
-gl := Gloat{
+gl := gloat.Gloat{
 	Store:    store,
 	Source:   gloat.NewFileSystemSource("migrations"),
 	Executor: gloat.NewSQLExecutor(db),
@@ -147,7 +147,7 @@ if err != nil {
 	// error indicates unsuported one.
 }
 
-gl := Gloat{
+gl := gloat.Gloat{
 	Store:    store,
 	Source:   gloat.NewFileSystemSource("migrations"),
 	Executor: gloat.NewSQLExecutor(db),
