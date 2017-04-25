@@ -1,6 +1,7 @@
 package gloat
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -18,20 +19,19 @@ type Source interface {
 //     ├── down.sql
 //     └── up.sql
 type FileSystemSource struct {
-	MigrationsFolder string
+	Dir string
 }
 
-// Collect builds migrations stored in a migrations folder like the following
-// the one below:
+// Collect builds migrations stored in a folder like the following structure:
 //
 // migrations/
 // └── 20170329154959_introduce_domain_model
 //     ├── down.sql
 //     └── up.sql
 func (s *FileSystemSource) Collect() (migrations Migrations, err error) {
-	err = filepath.Walk(s.MigrationsFolder, func(path string, info os.FileInfo, err error) error {
-		if info != nil && info.IsDir() && path != s.MigrationsFolder {
-			migration, err := MigrationFromPath(path)
+	err = filepath.Walk(s.Dir, func(path string, info os.FileInfo, err error) error {
+		if info != nil && info.IsDir() && path != s.Dir {
+			migration, err := MigrationFromBytes(path, ioutil.ReadFile)
 			if err != nil {
 				return err
 			}
@@ -47,6 +47,38 @@ func (s *FileSystemSource) Collect() (migrations Migrations, err error) {
 
 // NewFileSystemSource creates a new source of migrations that takes them right
 // out of the file system.
-func NewFileSystemSource(migrationsFolder string) Source {
-	return &FileSystemSource{MigrationsFolder: migrationsFolder}
+func NewFileSystemSource(dir string) Source {
+	return &FileSystemSource{Dir: dir}
+}
+
+// AssetSource is a go-bindata migration source for binary embedded migrations.
+// You need to pass a prefix, the Asset and AssetDir functions, go-bindata
+// generates.
+type AssetSource struct {
+	Prefix   string
+	Asset    func(string) ([]byte, error)
+	AssetDir func(string) ([]string, error)
+}
+
+// Collect builds migrations from a go-bindata embedded migrations.
+func (s *AssetSource) Collect() (migrations Migrations, err error) {
+	dirs, err := s.AssetDir(s.Prefix)
+	if err != nil {
+		return
+	}
+
+	for _, path := range dirs {
+		var migration *Migration
+
+		migration, err = MigrationFromBytes(filepath.Join(s.Prefix, path), s.Asset)
+		if err != nil {
+			return
+		}
+
+		migrations = append(migrations, migration)
+	}
+
+	migrations.Sort()
+
+	return
 }

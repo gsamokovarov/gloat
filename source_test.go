@@ -1,6 +1,7 @@
 package gloat
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -15,7 +16,7 @@ func TestFileSystemSourceCollect(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	m, err := MigrationFromPath(filepath.Join(td, "20170329154959_introduce_domain_model"))
+	m, err := MigrationFromBytes(filepath.Join(td, "20170329154959_introduce_domain_model"), ioutil.ReadFile)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

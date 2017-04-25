@@ -1,6 +1,7 @@
 package gloat
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -9,7 +10,7 @@ import (
 func TestDatabaseStore_Insert(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
-	migration, err := MigrationFromPath(td)
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -44,7 +45,7 @@ func TestDatabaseStore_Insert(t *testing.T) {
 func TestDatabaseStore_Remove(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
-	migration, err := MigrationFromPath(td)
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -75,7 +76,7 @@ func TestDatabaseStore_Remove(t *testing.T) {
 func TestDatabaseStore_Collect(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
-	migration, err := MigrationFromPath(td)
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

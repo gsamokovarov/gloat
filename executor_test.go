@@ -1,6 +1,7 @@
 package gloat
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 )
@@ -10,7 +11,7 @@ func TestSQLExecutor_Up(t *testing.T) {
 
 	exe := NewSQLExecutor(db)
 
-	migration, err := MigrationFromPath(td)
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -31,7 +32,7 @@ func TestSQLExecutor_Down(t *testing.T) {
 
 	exe := NewSQLExecutor(db)
 
-	migration, err := MigrationFromPath(td)
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

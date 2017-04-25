@@ -1,6 +1,7 @@
 package gloat
 
 import (
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
@@ -35,7 +36,7 @@ func TestMigrationPersistable(t *testing.T) {
 func TestMigrationFromPath(t *testing.T) {
 	expectedPath := "testdata/migrations/20170329154959_introduce_domain_model"
 
-	m, err := MigrationFromPath(expectedPath)
+	m, err := MigrationFromBytes(expectedPath, ioutil.ReadFile)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -54,7 +55,7 @@ func TestMigrationsExcept(t *testing.T) {
 
 	expectedPath := "testdata/migrations/20170329154959_introduce_domain_model"
 
-	m, err := MigrationFromPath(expectedPath)
+	m, err := MigrationFromBytes(expectedPath, ioutil.ReadFile)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

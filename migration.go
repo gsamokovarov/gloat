@@ -2,7 +2,6 @@ package gloat
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -53,27 +52,21 @@ func GenerateMigration(str string) *Migration {
 	}
 }
 
-// MigrationFromPath builds a Migration struct from a path of a directory structure
-// like the one below:
-//
-// 20170329154959_introduce_domain_model/
-// ├── down.sql
-// └── up.sql
-//
-// If the path does not exist or does not follow the name conventions, an error
-// could be returned.
-func MigrationFromPath(path string) (*Migration, error) {
+// MigrationFromBytes builds a Migration struct from a path and a
+// function. Functions like ioutil.ReadFile, go-bindata's Asset have
+// the very same signature, so you can use them here.
+func MigrationFromBytes(path string, fn func(string) ([]byte, error)) (*Migration, error) {
 	version, err := versionFromPath(path)
 	if err != nil {
 		return nil, err
 	}
 
-	upSQL, err := ioutil.ReadFile(filepath.Join(path, "up.sql"))
+	upSQL, err := fn(filepath.Join(path, "up.sql"))
 	if err != nil {
 		return nil, err
 	}
 
-	downSQL, err := ioutil.ReadFile(filepath.Join(path, "down.sql"))
+	downSQL, err := fn(filepath.Join(path, "down.sql"))
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
