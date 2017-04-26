@@ -2,6 +2,7 @@ package gloat
 
 import (
 	"database/sql"
+	"errors"
 	"net/url"
 	"os"
 	"strings"
@@ -67,6 +68,19 @@ func cleanState(fn func()) error {
 	fn()
 
 	return nil
+}
+
+func databaseStoreFactory(driver string, db *sql.DB) (Store, error) {
+	switch driver {
+	case "postgres":
+		return NewPostgreSQLStore(db), nil
+	case "mysql":
+		return NewMySQLStore(db), nil
+	case "sqlite", "sqlite3":
+		return NewMySQLStore(db), nil
+	}
+
+	return nil, errors.New("unsupported database driver " + driver)
 }
 
 func TestUnapplied(t *testing.T) {

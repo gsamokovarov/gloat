@@ -2,7 +2,6 @@ package gloat
 
 import (
 	"database/sql"
-	"errors"
 )
 
 // Store is an interface representing a place where the applied migrations are
@@ -134,19 +133,4 @@ func NewSQLite3Store(db *sql.DB) Store {
 			SELECT version
 			FROM schema_migrations`,
 	}
-}
-
-// NewDatabaseStore creates a store for an RDBMS hinted by a driver string. The
-// supported drivers are: postgres, mysql, sqlite and sqlite3.
-func NewDatabaseStore(driver string, db *sql.DB) (Store, error) {
-	switch driver {
-	case "postgres":
-		return NewPostgreSQLStore(db), nil
-	case "mysql":
-		return NewMySQLStore(db), nil
-	case "sqlite", "sqlite3":
-		return NewMySQLStore(db), nil
-	}
-
-	return nil, errors.New("unsupported database driver " + driver)
 }

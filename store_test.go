@@ -15,7 +15,7 @@ func TestDatabaseStore_Insert(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	dbStore, err := NewDatabaseStore(dbDriver, db)
+	dbStore, err := databaseStoreFactory(dbDriver, db)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestDatabaseStore_Remove(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	dbStore, err := NewDatabaseStore(dbDriver, db)
+	dbStore, err := databaseStoreFactory(dbDriver, db)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestDatabaseStore_Collect(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	dbStore, err := NewDatabaseStore(dbDriver, db)
+	dbStore, err := databaseStoreFactory(dbDriver, db)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

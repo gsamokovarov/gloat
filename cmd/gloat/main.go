@@ -190,7 +190,7 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 		return nil, err
 	}
 
-	store, err := gloat.NewDatabaseStore(u.Scheme, db)
+	store, err := databaseStoreFactory(u.Scheme, db)
 	if err != nil {
 		return nil, err
 	}
@@ -200,4 +200,17 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 		Source:   gloat.NewFileSystemSource(args.src),
 		Executor: gloat.NewSQLExecutor(db),
 	}, nil
+}
+
+func databaseStoreFactory(driver string, db *sql.DB) (gloat.Store, error) {
+	switch driver {
+	case "postgres":
+		return gloat.NewPostgreSQLStore(db), nil
+	case "mysql":
+		return gloat.NewMySQLStore(db), nil
+	case "sqlite", "sqlite3":
+		return gloat.NewMySQLStore(db), nil
+	}
+
+	return nil, errors.New("unsupported database driver " + driver)
 }

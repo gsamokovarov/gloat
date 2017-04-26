@@ -98,7 +98,7 @@ If the `down.sql` file is not present, we say that a migration is irreversible.
 
 The Store is an interface representing a place where the applied migrations are
 recorded. The common thing is to store the migrations in a database table. The
-`gloat.DatabaseStore` does just that. The `gloat.NewDatabaseStore` constructor
+`gloat.DatabaseStore` does just that. The `gloat.NewPostgreSQLStore` constructor
 function creates such store that records the migration in a table called
 `schema_migrations`. The table is automatically created if it does not exist.
 
@@ -113,7 +113,7 @@ type Store interface {
 
 The `Store.Insert` records the migration version in to the `schema_migrations`
 table, while `Store.Remove` deletes the column with the version from
-the table. There are the following builtin store constructors.
+the table. There are the following builtin store constructors:
 
 ```go
 // NewPostgreSQLStore creates a Store for PostgreSQL.
@@ -124,10 +124,6 @@ func NewMySQLStore(db *sql.DB) Store {}
 
 // NewSQLite3Store creates a Store for SQLite3.
 func NewSQLite3Store(db *sql.DB) Store {}
-
-// NewDatabaseStore creates a store for an RDBMS hinted by a driver string. The
-// supported drivers are: postgres, mysql, sqlite and sqlite3.
-func NewDatabaseStore(driver string, db *sql.DB) (Store, error) {}
 ```
 
 ### Executor
