@@ -24,14 +24,8 @@ if err != nil {
 	// Handle the *sql.DB creation error.
 }
 
-store, _ := gloat.NewDatabaseStore("postgres", db)
-if err != nil {
-	// The supported RDBMS drivers are `postgresql`, `mysql` and `sqlite`. The
-	// error indicates unsuported one.
-}
-
 gl := gloat.Gloat{
-	Store:    store,
+	Store:    gloat.NewPostgreSQLStore(db),
 	Source:   gloat.NewFileSystemSource("migrations"),
 	Executor: gloat.NewSQLExecutor(db),
 }
@@ -118,7 +112,23 @@ type Store interface {
 ```
 
 The `Store.Insert` records the migration version in to the `schema_migrations`
-table, while `Store.Remove` deletes the column with the version from the table.
+table, while `Store.Remove` deletes the column with the version from
+the table. There are the following builtin store constructors.
+
+```go
+// NewPostgreSQLStore creates a Store for PostgreSQL.
+func NewPostgreSQLStore(db *sql.DB) Store {}
+
+// NewMySQLStore creates a Store for MySQL.
+func NewMySQLStore(db *sql.DB) Store {}
+
+// NewSQLite3Store creates a Store for SQLite3.
+func NewSQLite3Store(db *sql.DB) Store {}
+
+// NewDatabaseStore creates a store for an RDBMS hinted by a driver string. The
+// supported drivers are: postgres, mysql, sqlite and sqlite3.
+func NewDatabaseStore(driver string, db *sql.DB) (Store, error) {}
+```
 
 ### Executor
 
@@ -141,14 +151,8 @@ A `Gloat` binds a migration `Source`, `Store` and `Executor` into one thing, so
 it's easier to `Apply`, and `Revert` migrations.
 
 ```go
-store, _ := gloat.NewDatabaseStore("postgres", db)
-if err != nil {
-	// The supported RDBMS drivers are `postgresql`, `mysql` and `sqlite`. The
-	// error indicates unsuported one.
-}
-
 gl := gloat.Gloat{
-	Store:    store,
+	Store:    gloat.NewPostgreSQLStore(db),
 	Source:   gloat.NewFileSystemSource("migrations"),
 	Executor: gloat.NewSQLExecutor(db),
 }
