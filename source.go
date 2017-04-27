@@ -42,6 +42,8 @@ func (s *FileSystemSource) Collect() (migrations Migrations, err error) {
 		return nil
 	})
 
+	migrations.Sort()
+
 	return
 }
 
