@@ -204,7 +204,7 @@ func setupGloat(args arguments) (*gloat.Gloat, error) {
 
 func databaseStoreFactory(driver string, db *sql.DB) (gloat.Store, error) {
 	switch driver {
-	case "postgres":
+	case "postgres", "postgresql":
 		return gloat.NewPostgreSQLStore(db), nil
 	case "mysql":
 		return gloat.NewMySQLStore(db), nil

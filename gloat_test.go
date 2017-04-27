@@ -72,7 +72,7 @@ func cleanState(fn func()) error {
 
 func databaseStoreFactory(driver string, db *sql.DB) (Store, error) {
 	switch driver {
-	case "postgres":
+	case "postgres", "postgresql":
 		return NewPostgreSQLStore(db), nil
 	case "mysql":
 		return NewMySQLStore(db), nil
