@@ -106,8 +106,8 @@ function creates such store that records the migration in a table called
 type Store interface {
 	Source
 
-	Insert(*Migration) error
-	Remove(*Migration) error
+	Insert(*Migration, StoreExecer) error
+	Remove(*Migration, StoreExecer) error
 }
 ```
 
