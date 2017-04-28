@@ -87,7 +87,7 @@ func TestDatabaseStore_Collect(t *testing.T) {
 	}
 
 	cleanState(func() {
-		if err := dbStore.Insert(migration); err != nil {
+		if err := dbStore.Insert(migration, nil); err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
