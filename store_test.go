@@ -25,7 +25,7 @@ func TestDatabaseStore_Insert(t *testing.T) {
 			t.Fatal("Expected table schema_migrations to not exist")
 		}
 
-		if err := dbStore.Insert(migration); err != nil {
+		if err := dbStore.Insert(migration, nil); err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
@@ -56,11 +56,11 @@ func TestDatabaseStore_Remove(t *testing.T) {
 	}
 
 	cleanState(func() {
-		if err := dbStore.Insert(migration); err != nil {
+		if err := dbStore.Insert(migration, nil); err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		if err := dbStore.Remove(migration); err != nil {
+		if err := dbStore.Remove(migration, nil); err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 

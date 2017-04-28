@@ -4,13 +4,19 @@ import (
 	"database/sql"
 )
 
+// StoreExecer is an interface compatible with sql.Tx.Exec. Can be passed as
+// nil on non-SQL stores.
+type StoreExecer interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
 // Store is an interface representing a place where the applied migrations are
 // recorded.
 type Store interface {
 	Source
 
-	Insert(*Migration) error
-	Remove(*Migration) error
+	Insert(*Migration, StoreExecer) error
+	Remove(*Migration, StoreExecer) error
 }
 
 // DatabaseStore is a Store that keeps the applied migrations in a database
@@ -26,22 +32,30 @@ type DatabaseStore struct {
 }
 
 // Insert records a migration version into the schema_migrations table.
-func (s *DatabaseStore) Insert(migration *Migration) error {
+func (s *DatabaseStore) Insert(migration *Migration, execer StoreExecer) error {
+	if execer == nil {
+		execer = s.db
+	}
+
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
 	}
 
-	_, err := s.db.Exec(s.insertMigrationStatement, migration.Version)
+	_, err := execer.Exec(s.insertMigrationStatement, migration.Version)
 	return err
 }
 
 // Remove removes a migration version from the schema_migrations table.
-func (s *DatabaseStore) Remove(migration *Migration) error {
+func (s *DatabaseStore) Remove(migration *Migration, execer StoreExecer) error {
+	if execer == nil {
+		execer = s.db
+	}
+
 	if err := s.ensureSchemaTableExists(); err != nil {
 		return err
 	}
 
-	_, err := s.db.Exec(s.removeMigrationStatement, migration.Version)
+	_, err := execer.Exec(s.removeMigrationStatement, migration.Version)
 	return err
 }
 
