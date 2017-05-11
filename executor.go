@@ -40,6 +40,7 @@ func (e *SQLExecutor) Up(migration *Migration, store Store) error {
 	}
 
 	if err := store.Insert(migration, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
 
