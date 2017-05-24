@@ -100,6 +100,7 @@ func TestUnapplied_Empty(t *testing.T) {
 	gl.Store = &testingStore{
 		applied: Migrations{
 			&Migration{Version: 20170329154959},
+			&Migration{Version: 20170511172647},
 		},
 	}
 
