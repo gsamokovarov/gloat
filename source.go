@@ -85,7 +85,8 @@ func (s *AssetSource) Collect() (migrations Migrations, err error) {
 	return
 }
 
-// NewAssetSource creates a new source of binary migrations with go-bindata.
+// NewAssetSource creates a new source of binary migrations embedded into the
+// program with go-bindata.
 func NewAssetSource(prefix string, asset func(string) ([]byte, error), assetDir func(string) ([]string, error)) Source {
 	return &AssetSource{Prefix: prefix, Asset: asset, AssetDir: assetDir}
 }

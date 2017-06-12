@@ -46,3 +46,17 @@ func TestFileSystemSourceCollectEmpty(t *testing.T) {
 		t.Fatalf("Expected no migrations collected in: %s", td)
 	}
 }
+
+func TestAssetSourceDoesNotBreakOnIrreversibleMigrations(t *testing.T) {
+	td := "testdata/migrations"
+	fs := NewAssetSource(td, Asset, AssetDir)
+
+	migrations, err := fs.Collect()
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	if len(migrations) == 0 {
+		t.Fatalf("Expected migrations collected in: %s, got none", td)
+	}
+}

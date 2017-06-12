@@ -8,6 +8,7 @@ install:
   - go get github.com/go-sql-driver/mysql
   - go get github.com/lib/pq
   - go get github.com/mattn/go-sqlite3
+  - go get github.com/jteeuwen/go-bindata
 
 before_script:
   - psql  -c "CREATE DATABASE gloat_test;" -U postgres

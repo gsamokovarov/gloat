@@ -2,7 +2,6 @@ package gloat
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -66,10 +65,10 @@ func MigrationFromBytes(path string, fn func(string) ([]byte, error)) (*Migratio
 		return nil, err
 	}
 
-	downSQL, err := fn(filepath.Join(path, "down.sql"))
-	if err != nil && !os.IsNotExist(err) {
-		return nil, err
-	}
+	// This may be an error from the OS or the go-bindata generated Asset
+	// function ("Asset %s can't read by error: %v"). Just ignore it, as we can
+	// have embedded irreversible migrations.
+	downSQL, _ := fn(filepath.Join(path, "down.sql"))
 
 	return &Migration{
 		UpSQL:   upSQL,
