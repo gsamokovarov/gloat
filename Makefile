@@ -4,16 +4,16 @@ build:
 	@go build -o bin/gloat github.com/gsamokovarov/gloat/cmd/gloat
 
 .PHONY: test
-test: embed
+test:
 	@go test ./...
 
 .PHONY: test.sqlite
-test.sqlite: embed
+test.sqlite:
 	@env DATABASE_URL=sqlite3://:memory: go test ./...
 
-.PHONY: embed
-embed:
-	@go-bindata -pkg gloat -o test_assets.go testdata/migrations/*
+.PHONY: test.assets
+test.assets:
+	@go-bindata -pkg gloat -o assets_test.go testdata/migrations/*
 
 .PHONY: lint
 lint:
