@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	now = time.Now()
+	now = time.Now().UTC()
 
 	nameNormalizerRe = regexp.MustCompile(`([a-z])([A-Z])`)
 	versionFormat    = "20060102150405"
