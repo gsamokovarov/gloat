@@ -22,12 +22,19 @@ type Executor interface {
 	Down(*Migration, Store) error
 }
 
-// SQLExecutor is a type that executes migrations in a database.
-type SQLExecutor struct {
-	db *sql.DB
+// SQLExecer is usually satisfied by *sql.DB, but if you have wrappers around
+// it, that's the minimal interface they need to cover.
+type SQLExecer interface {
+	Begin() (*sql.Tx, error)
+	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
-// Up applies a migrations.
+// SQLExecutor is a type that executes migrations in a database.
+type SQLExecutor struct {
+	db SQLExecer
+}
+
+// Up applies a migration.
 func (e *SQLExecutor) Up(migration *Migration, store Store) error {
 	tx, err := e.db.Begin()
 	if err != nil {
@@ -71,6 +78,6 @@ func (e *SQLExecutor) Down(migration *Migration, store Store) error {
 }
 
 // NewSQLExecutor creates an SQLExecutor.
-func NewSQLExecutor(db *sql.DB) Executor {
+func NewSQLExecutor(db SQLExecer) Executor {
 	return &SQLExecutor{db: db}
 }
