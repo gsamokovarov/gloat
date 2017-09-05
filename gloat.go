@@ -1,5 +1,7 @@
 package gloat
 
+import "database/sql"
+
 // Gloat glues all the components needed to apply and revert
 // migrations.
 type Gloat struct {
@@ -61,4 +63,19 @@ func (c *Gloat) Apply(migration *Migration) error {
 // Revert rollbacks a migration.
 func (c *Gloat) Revert(migration *Migration) error {
 	return c.Executor.Down(migration, c.Store)
+}
+
+// SQLExecer is an interface compatible with sql.Tx.Exec. Can be passed as
+// nil on non-SQL stores.
+type SQLExecer interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+}
+
+// SQLTransactor is usually satisfied by *sql.DB, but can be used by wrappers
+// around it.
+type SQLTransactor interface {
+	SQLExecer
+
+	Begin() (*sql.Tx, error)
 }

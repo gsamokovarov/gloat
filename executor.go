@@ -1,7 +1,6 @@
 package gloat
 
 import (
-	"database/sql"
 	"fmt"
 )
 
@@ -22,16 +21,9 @@ type Executor interface {
 	Down(*Migration, Store) error
 }
 
-// SQLExecer is usually satisfied by *sql.DB, but if you have wrappers around
-// it, that's the minimal interface they need to cover.
-type SQLExecer interface {
-	Begin() (*sql.Tx, error)
-	Exec(query string, args ...interface{}) (sql.Result, error)
-}
-
 // SQLExecutor is a type that executes migrations in a database.
 type SQLExecutor struct {
-	db SQLExecer
+	db SQLTransactor
 }
 
 // Up applies a migration.
@@ -78,6 +70,6 @@ func (e *SQLExecutor) Down(migration *Migration, store Store) error {
 }
 
 // NewSQLExecutor creates an SQLExecutor.
-func NewSQLExecutor(db SQLExecer) Executor {
+func NewSQLExecutor(db SQLTransactor) Executor {
 	return &SQLExecutor{db: db}
 }

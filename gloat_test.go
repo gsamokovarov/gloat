@@ -25,9 +25,9 @@ var (
 
 type testingStore struct{ applied Migrations }
 
-func (s *testingStore) Collect() (Migrations, error)                     { return s.applied, nil }
-func (s *testingStore) Insert(migration *Migration, _ StoreExecer) error { return nil }
-func (s *testingStore) Remove(migration *Migration, _ StoreExecer) error { return nil }
+func (s *testingStore) Collect() (Migrations, error)                   { return s.applied, nil }
+func (s *testingStore) Insert(migration *Migration, _ SQLExecer) error { return nil }
+func (s *testingStore) Remove(migration *Migration, _ SQLExecer) error { return nil }
 
 type testingExecutor struct{}
 

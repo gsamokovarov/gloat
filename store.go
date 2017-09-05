@@ -1,29 +1,19 @@
 package gloat
 
-import (
-	"database/sql"
-)
-
-// StoreExecer is an interface compatible with sql.Tx.Exec. Can be passed as
-// nil on non-SQL stores.
-type StoreExecer interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
-}
-
 // Store is an interface representing a place where the applied migrations are
 // recorded.
 type Store interface {
 	Source
 
-	Insert(*Migration, StoreExecer) error
-	Remove(*Migration, StoreExecer) error
+	Insert(*Migration, SQLExecer) error
+	Remove(*Migration, SQLExecer) error
 }
 
 // DatabaseStore is a Store that keeps the applied migrations in a database
 // table called schema_migrations. The table is automatically created if it
 // does not exist.
 type DatabaseStore struct {
-	db *sql.DB
+	db SQLTransactor
 
 	createTableStatement         string
 	insertMigrationStatement     string
@@ -32,7 +22,7 @@ type DatabaseStore struct {
 }
 
 // Insert records a migration version into the schema_migrations table.
-func (s *DatabaseStore) Insert(migration *Migration, execer StoreExecer) error {
+func (s *DatabaseStore) Insert(migration *Migration, execer SQLExecer) error {
 	if execer == nil {
 		execer = s.db
 	}
@@ -46,7 +36,7 @@ func (s *DatabaseStore) Insert(migration *Migration, execer StoreExecer) error {
 }
 
 // Remove removes a migration version from the schema_migrations table.
-func (s *DatabaseStore) Remove(migration *Migration, execer StoreExecer) error {
+func (s *DatabaseStore) Remove(migration *Migration, execer SQLExecer) error {
 	if execer == nil {
 		execer = s.db
 	}
@@ -90,7 +80,7 @@ func (s *DatabaseStore) ensureSchemaTableExists() error {
 }
 
 // NewPostgreSQLStore creates a Store for PostgreSQL.
-func NewPostgreSQLStore(db *sql.DB) Store {
+func NewPostgreSQLStore(db SQLTransactor) Store {
 	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
@@ -110,7 +100,7 @@ func NewPostgreSQLStore(db *sql.DB) Store {
 }
 
 // NewMySQLStore creates a Store for MySQL.
-func NewMySQLStore(db *sql.DB) Store {
+func NewMySQLStore(db SQLTransactor) Store {
 	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
@@ -130,7 +120,7 @@ func NewMySQLStore(db *sql.DB) Store {
 }
 
 // NewSQLite3Store creates a Store for SQLite3.
-func NewSQLite3Store(db *sql.DB) Store {
+func NewSQLite3Store(db SQLTransactor) Store {
 	return &DatabaseStore{
 		db: db,
 		createTableStatement: `
