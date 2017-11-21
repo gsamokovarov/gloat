@@ -20,7 +20,7 @@ type Gloat struct {
 
 // Unapplied returns the unapplied migrations in the current gloat.
 func (c *Gloat) Unapplied() (Migrations, error) {
-	return UnappliedMigrations(c.Source, c.Store)
+	return UnappliedMigrations(c.Store, c.Source)
 }
 
 // Current returns the latest applied migration. Even if no error is returned,

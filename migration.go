@@ -102,24 +102,20 @@ type Migrations []*Migration
 
 // Except selects migrations that does not exist in the current ones.
 func (m Migrations) Except(migrations Migrations) (excepted Migrations) {
-	current := map[int64]bool{}
+	// Mark the current transactions.
+	current := make(map[int64]bool)
 	for _, migration := range m {
 		current[migration.Version] = true
 	}
 
-	new := map[int64]bool{}
+	// Mark the ones in the migrations set, which we do have to get.
+	new := make(map[int64]bool)
 	for _, migration := range migrations {
 		new[migration.Version] = true
 	}
 
-	for _, migration := range m {
-		if !new[migration.Version] {
-			excepted = append(excepted, migration)
-		}
-	}
-
 	for _, migration := range migrations {
-		if !current[migration.Version] {
+		if new[migration.Version] && !current[migration.Version] {
 			excepted = append(excepted, migration)
 		}
 	}
@@ -150,18 +146,18 @@ func (m Migrations) Current() *Migration {
 
 // UnappliedMigrations selects the unapplied migrations from a Source. For a
 // migration to be unapplied it should not be present in the Store.
-func UnappliedMigrations(source Source, store Store) (Migrations, error) {
-	allMigrations, err := source.Collect()
-	if err != nil {
-		return nil, err
-	}
-
+func UnappliedMigrations(store, source Source) (Migrations, error) {
 	appliedMigrations, err := store.Collect()
 	if err != nil {
 		return nil, err
 	}
 
-	unappliedMigrations := allMigrations.Except(appliedMigrations)
+	incomingMigrations, err := source.Collect()
+	if err != nil {
+		return nil, err
+	}
+
+	unappliedMigrations := appliedMigrations.Except(incomingMigrations)
 	unappliedMigrations.Sort()
 
 	return unappliedMigrations, nil

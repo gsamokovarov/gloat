@@ -49,7 +49,7 @@ func TestMigrationsExcept(t *testing.T) {
 	migrations = append(migrations, m)
 
 	exceptedMigrations := migrations.Except(nil)
-	assert.Equal(t, exceptedMigrations, migrations)
+	assert.Nil(t, exceptedMigrations)
 
 	exceptedMigrations = migrations.Except(Migrations{m})
 	assert.Len(t, 0, exceptedMigrations)
