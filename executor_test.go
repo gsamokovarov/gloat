@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+
+	"github.com/gsamokovarov/assert"
 )
 
 func TestSQLExecutor_Up(t *testing.T) {
@@ -12,18 +14,14 @@ func TestSQLExecutor_Up(t *testing.T) {
 	exe := NewSQLExecutor(db)
 
 	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	cleanState(func() {
-		if err := exe.Up(migration, new(testingStore)); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err := exe.Up(migration, new(testingStore))
+		assert.Nil(t, err)
 
-		if _, err := db.Exec(`SELECT id FROM users LIMIT 1`); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		_, err = db.Exec(`SELECT id FROM users LIMIT 1`)
+		assert.Nil(t, err)
 	})
 }
 
@@ -33,21 +31,16 @@ func TestSQLExecutor_Down(t *testing.T) {
 	exe := NewSQLExecutor(db)
 
 	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	cleanState(func() {
-		if err := exe.Up(migration, new(testingStore)); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		exe.Up(migration, new(testingStore))
+		assert.Nil(t, err)
 
-		if err := exe.Down(migration, new(testingStore)); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err = exe.Down(migration, new(testingStore))
+		assert.Nil(t, err)
 
-		if _, err := db.Exec(`SELECT id FROM users LIMIT 1`); err == nil {
-			t.Error("Expected table users to be dropped")
-		}
+		_, err := db.Exec(`SELECT id FROM users LIMIT 1`)
+		assert.NotNil(t, err)
 	})
 }

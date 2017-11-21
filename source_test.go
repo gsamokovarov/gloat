@@ -3,8 +3,9 @@ package gloat
 import (
 	"io/ioutil"
 	"path/filepath"
-	"reflect"
 	"testing"
+
+	"github.com/gsamokovarov/assert"
 )
 
 func TestFileSystemSourceCollect(t *testing.T) {
@@ -12,25 +13,16 @@ func TestFileSystemSourceCollect(t *testing.T) {
 	fs := NewFileSystemSource(td)
 
 	migrations, err := fs.Collect()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	m1, err := MigrationFromBytes(filepath.Join(td, "20170329154959_introduce_domain_model"), ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	m2, err := MigrationFromBytes(filepath.Join(td, "20170511172647_irreversible_migration_brah"), ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	expectedMigrations := Migrations{m1, m2}
-
-	if !reflect.DeepEqual(migrations, expectedMigrations) {
-		t.Fatalf("Expected migrations to be: %v, got %v", expectedMigrations, migrations)
-	}
+	assert.Equal(t, migrations, expectedMigrations)
 }
 
 func TestFileSystemSourceCollectEmpty(t *testing.T) {
@@ -38,13 +30,9 @@ func TestFileSystemSourceCollectEmpty(t *testing.T) {
 	fs := NewFileSystemSource(td)
 
 	migrations, err := fs.Collect()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if len(migrations) != 0 {
-		t.Fatalf("Expected no migrations collected in: %s", td)
-	}
+	assert.Len(t, 0, migrations)
 }
 
 func TestAssetSourceDoesNotBreakOnIrreversibleMigrations(t *testing.T) {
@@ -52,11 +40,7 @@ func TestAssetSourceDoesNotBreakOnIrreversibleMigrations(t *testing.T) {
 	fs := NewAssetSource(td, Asset, AssetDir)
 
 	migrations, err := fs.Collect()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if len(migrations) == 0 {
-		t.Fatalf("Expected migrations collected in: %s, got none", td)
-	}
+	assert.Len(t, 2, migrations)
 }

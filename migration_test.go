@@ -2,22 +2,19 @@ package gloat
 
 import (
 	"io/ioutil"
-	"reflect"
 	"testing"
+
+	"github.com/gsamokovarov/assert"
 )
 
 func TestMigrationReversible(t *testing.T) {
 	m := Migration{}
 
-	if m.Reversible() {
-		t.Fatalf("Expected %v to not be reversible", m)
-	}
+	assert.False(t, m.Reversible())
 
 	m.DownSQL = []byte("DROP TABLE users;")
 
-	if !m.Reversible() {
-		t.Fatalf("Expected %v to be reversible", m)
-	}
+	assert.True(t, m.Reversible())
 }
 
 func TestMigrationPersistable(t *testing.T) {
@@ -28,26 +25,17 @@ func TestMigrationPersistable(t *testing.T) {
 	}
 
 	m.Path = "migrations/0001_something"
-	if !m.Persistable() {
-		t.Fatalf("Expected %v to be persistable", m)
-	}
+	assert.True(t, m.Persistable())
 }
 
 func TestMigrationFromPath(t *testing.T) {
 	expectedPath := "testdata/migrations/20170329154959_introduce_domain_model"
 
 	m, err := MigrationFromBytes(expectedPath, ioutil.ReadFile)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if m.Version != 20170329154959 {
-		t.Fatalf("Expected migration with version 20170329154959, got %d", m.Version)
-	}
-
-	if m.Path != expectedPath {
-		t.Fatalf("Expected migration with path %s, got: %s", expectedPath, m.Path)
-	}
+	assert.Equal(t, 20170329154959, m.Version)
+	assert.Equal(t, expectedPath, m.Path)
 }
 
 func TestMigrationsExcept(t *testing.T) {
@@ -56,19 +44,13 @@ func TestMigrationsExcept(t *testing.T) {
 	expectedPath := "testdata/migrations/20170329154959_introduce_domain_model"
 
 	m, err := MigrationFromBytes(expectedPath, ioutil.ReadFile)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	migrations = append(migrations, m)
 
 	exceptedMigrations := migrations.Except(nil)
-	if !reflect.DeepEqual(migrations, exceptedMigrations) {
-		t.Fatalf("Expected exceptedMigrations to be unchanged, got: %v", exceptedMigrations)
-	}
+	assert.Equal(t, exceptedMigrations, migrations)
 
 	exceptedMigrations = migrations.Except(Migrations{m})
-	if len(exceptedMigrations) != 0 {
-		t.Fatalf("Expected exceptedMigrations to be empty, got: %v", exceptedMigrations)
-	}
+	assert.Len(t, 0, exceptedMigrations)
 }

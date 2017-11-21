@@ -1,44 +1,36 @@
 package gloat
 
 import (
+	"database/sql"
 	"io/ioutil"
 	"path/filepath"
-	"reflect"
 	"testing"
+
+	"github.com/gsamokovarov/assert"
 )
 
 func TestDatabaseStore_Insert(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
 	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	dbStore, err := databaseStoreFactory(dbDriver, db)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	cleanState(func() {
-		if _, err := db.Exec(`SELECT version FROM schema_migrations`); err == nil {
-			t.Fatal("Expected table schema_migrations to not exist")
-		}
+		_, err := db.Exec(`SELECT version FROM schema_migrations`)
+		assert.NotNil(t, err)
 
-		if err := dbStore.Insert(migration, nil); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err = dbStore.Insert(migration, nil)
+		assert.Nil(t, err)
 
 		var version int64
 
-		err := db.QueryRow(`SELECT version FROM schema_migrations`).Scan(&version)
-		if err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err = db.QueryRow(`SELECT version FROM schema_migrations`).Scan(&version)
+		assert.Nil(t, err)
 
-		if version != 20170329154959 {
-			t.Fatalf("Expected version to be 20170329154959, got %d", version)
-		}
+		assert.Equal(t, 20170329154959, version)
 	})
 }
 
@@ -46,30 +38,22 @@ func TestDatabaseStore_Remove(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
 	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	dbStore, err := databaseStoreFactory(dbDriver, db)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	cleanState(func() {
-		if err := dbStore.Insert(migration, nil); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err := dbStore.Insert(migration, nil)
+		assert.Nil(t, err)
 
-		if err := dbStore.Remove(migration, nil); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err = dbStore.Remove(migration, nil)
+		assert.Nil(t, err)
 
 		var version int64
 
-		row := db.QueryRow(`SELECT version FROM schema_migrations`)
-		if row.Scan(&version) == nil {
-			t.Fatal("Expected error no rows in result set")
-		}
+		err = db.QueryRow(`SELECT version FROM schema_migrations`).Scan(&version)
+		assert.Equal(t, sql.ErrNoRows, err)
 	})
 }
 
@@ -77,31 +61,22 @@ func TestDatabaseStore_Collect(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 
 	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	dbStore, err := databaseStoreFactory(dbDriver, db)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
 	cleanState(func() {
-		if err := dbStore.Insert(migration, nil); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		err := dbStore.Insert(migration, nil)
+		assert.Nil(t, err)
 
 		migrations, err := dbStore.Collect()
-		if err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
+		assert.Nil(t, err)
 
 		expectedMigrations := Migrations{
 			&Migration{Version: 20170329154959},
 		}
 
-		if !reflect.DeepEqual(migrations, expectedMigrations) {
-			t.Fatalf("Expected migrations to be: %v, got %v", expectedMigrations, migrations)
-		}
+		assert.Equal(t, migrations, expectedMigrations)
 	})
 }

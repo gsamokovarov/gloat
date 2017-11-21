@@ -10,6 +10,7 @@ import (
 
 	// Needed to establish database connections during testing.
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gsamokovarov/assert"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -87,13 +88,9 @@ func TestUnapplied(t *testing.T) {
 	gl.Store = &testingStore{applied: Migrations{}}
 
 	migrations, err := gl.Unapplied()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if migrations[0].Version != 20170329154959 {
-		t.Fatalf("Expected version 20170329154959, got: %d", migrations[0].Version)
-	}
+	assert.Equal(t, 20170329154959, migrations[0].Version)
 }
 
 func TestUnapplied_Empty(t *testing.T) {
@@ -105,13 +102,9 @@ func TestUnapplied_Empty(t *testing.T) {
 	}
 
 	migrations, err := gl.Unapplied()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if len(migrations) != 0 {
-		t.Fatalf("Expected no unapplied migrations, got: %v", migrations)
-	}
+	assert.Len(t, 0, migrations)
 }
 
 func TestCurrent(t *testing.T) {
@@ -122,30 +115,19 @@ func TestCurrent(t *testing.T) {
 	}
 
 	migration, err := gl.Current()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if migration == nil {
-		t.Errorf("Expected current migration, got: %v", migration)
-	}
-
-	if migration.Version != 20170329154959 {
-		t.Fatalf("Expected migration version to be 20170329154959, got: %d", migration.Version)
-	}
+	assert.NotNil(t, migration)
+	assert.Equal(t, 20170329154959, migration.Version)
 }
 
 func TestCurrent_Nil(t *testing.T) {
 	gl.Store = &testingStore{}
 
 	migration, err := gl.Current()
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	assert.Nil(t, err)
 
-	if migration != nil {
-		t.Fatalf("Expected no current migration, got: %v", migration)
-	}
+	assert.Nil(t, migration)
 }
 
 func TestApply(t *testing.T) {
@@ -161,9 +143,7 @@ func TestApply(t *testing.T) {
 
 	gl.Apply(nil)
 
-	if !called {
-		t.Fatalf("Expected Apply to call Executor.Up")
-	}
+	assert.True(t, called)
 }
 
 func TestRevert(t *testing.T) {
@@ -179,9 +159,7 @@ func TestRevert(t *testing.T) {
 
 	gl.Revert(nil)
 
-	if !called {
-		t.Fatalf("Expected Revert to call Executor.Down")
-	}
+	assert.True(t, called)
 }
 
 func init() {
