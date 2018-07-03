@@ -28,7 +28,7 @@ Commands:
 
 Options:
   -src          The folder with migrations
-                (default $DATABASE_SRC" or db/migrations)
+                (default $DATABASE_SRC or db/migrations)
   -url          The database connection URL
                 (default $DATABASE_URL)
   -help         Show this message
