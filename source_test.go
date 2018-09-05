@@ -21,7 +21,10 @@ func TestFileSystemSourceCollect(t *testing.T) {
 	m2, err := MigrationFromBytes(filepath.Join(td, "20170511172647_irreversible_migration_brah"), ioutil.ReadFile)
 	assert.Nil(t, err)
 
-	expectedMigrations := Migrations{m1, m2}
+	m3, err := MigrationFromBytes(filepath.Join(td, "20180905150724_concurrent_migration"), ioutil.ReadFile)
+	assert.Nil(t, err)
+
+	expectedMigrations := Migrations{m1, m2, m3}
 	assert.Equal(t, migrations, expectedMigrations)
 }
 

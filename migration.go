@@ -26,6 +26,7 @@ type Migration struct {
 	DownSQL []byte
 	Path    string
 	Version int64
+	Options MigrationOptions
 }
 
 // Reversible returns true if the migration DownSQL content is present. E.g. if
@@ -48,19 +49,20 @@ func GenerateMigration(str string) *Migration {
 	return &Migration{
 		Path:    path,
 		Version: version,
+		Options: DefaultMigrationOptions(),
 	}
 }
 
 // MigrationFromBytes builds a Migration struct from a path and a
 // function. Functions like ioutil.ReadFile, go-bindata's Asset have
 // the very same signature, so you can use them here.
-func MigrationFromBytes(path string, fn func(string) ([]byte, error)) (*Migration, error) {
+func MigrationFromBytes(path string, read func(string) ([]byte, error)) (*Migration, error) {
 	version, err := versionFromPath(path)
 	if err != nil {
 		return nil, err
 	}
 
-	upSQL, err := fn(filepath.Join(path, "up.sql"))
+	upSQL, err := read(filepath.Join(path, "up.sql"))
 	if err != nil {
 		return nil, err
 	}
@@ -68,13 +70,24 @@ func MigrationFromBytes(path string, fn func(string) ([]byte, error)) (*Migratio
 	// This may be an error from the OS or the go-bindata generated Asset
 	// function ("Asset %s can't read by error: %v"). Just ignore it, as we can
 	// have embedded irreversible migrations.
-	downSQL, _ := fn(filepath.Join(path, "down.sql"))
+	downSQL, _ := read(filepath.Join(path, "down.sql"))
+
+	optionsJSON, err := read(filepath.Join(path, "options.json"))
+	if err != nil {
+		optionsJSON = nil
+	}
+
+	options, err := parseMigrationOptions(optionsJSON)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Migration{
 		UpSQL:   upSQL,
 		DownSQL: downSQL,
 		Path:    path,
 		Version: version,
+		Options: options,
 	}, nil
 }
 

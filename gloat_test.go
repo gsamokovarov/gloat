@@ -89,7 +89,7 @@ func TestUnapplied(t *testing.T) {
 
 	migrations, err := gl.Unapplied()
 	assert.Nil(t, err)
-	assert.Len(t, 2, migrations)
+	assert.Len(t, 3, migrations)
 
 	assert.Equal(t, 20170329154959, migrations[0].Version)
 }
@@ -99,6 +99,7 @@ func TestUnapplied_Empty(t *testing.T) {
 		applied: Migrations{
 			&Migration{Version: 20170329154959},
 			&Migration{Version: 20170511172647},
+			&Migration{Version: 20180905150724},
 		},
 	}
 
@@ -113,6 +114,7 @@ func TestUnapplied_MissingInSource(t *testing.T) {
 		applied: Migrations{
 			&Migration{Version: 20170329154959},
 			&Migration{Version: 20170511172647},
+			&Migration{Version: 20180905150724},
 		},
 	}
 
