@@ -18,10 +18,11 @@ import (
 var (
 	gl Gloat
 
-	db       *sql.DB
-	dbURL    string
-	dbSrc    string
-	dbDriver string
+	db          *sql.DB
+	dbURL       string
+	dbSrc       string
+	dbSrcBroken string
+	dbDriver    string
 )
 
 type testingStore struct{ applied Migrations }
@@ -89,7 +90,7 @@ func TestUnapplied(t *testing.T) {
 
 	migrations, err := gl.Unapplied()
 	assert.Nil(t, err)
-	assert.Len(t, 3, migrations)
+	assert.Len(t, 4, migrations)
 
 	assert.Equal(t, 20170329154959, migrations[0].Version)
 }
@@ -100,6 +101,7 @@ func TestUnapplied_Empty(t *testing.T) {
 			&Migration{Version: 20170329154959},
 			&Migration{Version: 20170511172647},
 			&Migration{Version: 20180905150724},
+			&Migration{Version: 20180920181906},
 		},
 	}
 
@@ -115,6 +117,7 @@ func TestUnapplied_MissingInSource(t *testing.T) {
 			&Migration{Version: 20170329154959},
 			&Migration{Version: 20170511172647},
 			&Migration{Version: 20180905150724},
+			&Migration{Version: 20180920181906},
 		},
 	}
 

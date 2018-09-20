@@ -25,6 +25,20 @@ func TestSQLExecutor_Up(t *testing.T) {
 	})
 }
 
+func TestSQLExecutor_Up_Broken(t *testing.T) {
+	td := filepath.Join(dbSrc, "20180920181906_migration_with_an_error")
+
+	exe := NewSQLExecutor(db)
+
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
+	assert.Nil(t, err)
+
+	cleanState(func() {
+		err := exe.Up(migration, new(testingStore))
+		assert.Error(t, err)
+	})
+}
+
 func TestSQLExecutor_Down(t *testing.T) {
 	td := filepath.Join(dbSrc, "20170329154959_introduce_domain_model")
 

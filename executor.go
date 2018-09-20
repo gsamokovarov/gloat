@@ -28,11 +28,6 @@ type SQLExecutor struct {
 
 // Up applies a migration.
 func (e *SQLExecutor) Up(migration *Migration, store Store) error {
-	tx, err := e.db.Begin()
-	if err != nil {
-		return err
-	}
-
 	return e.exec(migration.Options.Transaction, func(tx SQLExecer) error {
 		if _, err := tx.Exec(string(migration.UpSQL)); err != nil {
 			return err
@@ -40,8 +35,6 @@ func (e *SQLExecutor) Up(migration *Migration, store Store) error {
 
 		return store.Insert(migration, tx)
 	})
-
-	return tx.Commit()
 }
 
 // Down reverses a migrations.
@@ -70,7 +63,8 @@ func (e *SQLExecutor) exec(transaction bool, action func(SQLExecer) error) error
 	}
 
 	if err := action(tx); err != nil {
-		return tx.Rollback()
+		defer tx.Rollback()
+		return err
 	}
 
 	return tx.Commit()
