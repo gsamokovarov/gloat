@@ -58,3 +58,17 @@ func TestSQLExecutor_Down(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 }
+
+func TestSQLExecutor_Down_Broken(t *testing.T) {
+	td := filepath.Join(dbSrc, "20180920181906_migration_with_an_error")
+
+	exe := NewSQLExecutor(db)
+
+	migration, err := MigrationFromBytes(td, ioutil.ReadFile)
+	assert.Nil(t, err)
+
+	cleanState(func() {
+		err := exe.Down(migration, new(testingStore))
+		assert.Error(t, err)
+	})
+}
